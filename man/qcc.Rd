@@ -6,8 +6,8 @@
 \title{Quality Control Charts}
 \description{Create an object of class `qcc' to perform statistical quality control. This object may then be used to plot Shewhart charts, Cusum and EWMA plotting, drawing OC curves, computes capability indices, and more.}
 \usage{
-qcc(data, type, std.dev, sizes, limits, target, data.name, labels, 
-    newdata, newsizes, newlabels, 
+qcc(data, type, sizes, center, std.dev, limits, target, 
+    data.name, labels, newdata, newsizes, newlabels, 
     nsigmas = 3, confidence.level, rules = shewhart.rules, 
     plot = TRUE, \dots)
 
@@ -30,7 +30,7 @@ qcc(data, type, std.dev, sizes, limits, target, data.name, labels,
 \tabular{lll}{
               \tab Statistic charted   \tab Chart description \cr
 \code{"xbar"} \tab mean                \tab means of a continuous process variable \cr
-\code{"S"}    \tab standard deviation  \tab stdandard deviations of a continuous variable \cr
+\code{"S"}    \tab standard deviation  \tab standard deviations of a continuous variable \cr
 \code{"R"}    \tab range               \tab ranges of a continuous process variable \cr
 \code{"xbar.one"} \tab mean            \tab one-at-time data of a continuous process variable \cr
 \code{"p"}    \tab proportion          \tab proportion of nonconforming units \cr
@@ -40,9 +40,11 @@ qcc(data, type, std.dev, sizes, limits, target, data.name, labels,
 }
 }
 
-\item{std.dev}{a value or a vector of values specifying the within-group standard deviation(s) of the process.}
-
 \item{sizes}{a value or a vector of values specifying the sample sizes associated with each group. For continuous data provided as data frame or matrix the sample sizes are obtained counting the non-\code{NA} elements of each row. For \code{"p"}, \code{"np"} and \code{"u"} charts the argument \code{sizes} is required.}
+
+\item{center}{a value specifying the center of group statistics.}
+
+\item{std.dev}{a value or a vector of values specifying the within-group standard deviation(s) of the process.}
 
 \item{limits}{a two-values vector specifying control limits.}
 
@@ -93,8 +95,8 @@ qcc(data, type, std.dev, sizes, limits, target, data.name, labels,
 %\details{}
 \value{Returns an object of class `qcc'}
 \references{
-Montgomery, D.C. (1991) \emph{Introduction to Statistical Quality Control}, 2nd ed, New York, John Wiley & Sons. \cr
-Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}, New York, Chapman and Hall.
+Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. \cr
+Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
 \author{Luca Scrucca \email{luca@stat.unipg.it}}
 %\note{ ~~further notes~~ }

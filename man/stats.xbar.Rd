@@ -22,14 +22,14 @@ limits.xbar(center, std.dev, sizes, conf)
 \value{
 The function \code{stats.xbar} returns a list with components \code{statistics} and \code{center}.
 
-The function \code{sd.xbar} returns \code{std.dev} the standard deviation of the statistic charted.
+The function \code{sd.xbar} returns \code{std.dev} the standard deviation of the statistic charted. This is based on results from Burr (1969).
 
 The function \code{limits.xbar} returns a matrix with lower and upper control limits. 
 }
 \references{
-Montgomery, D.C. (1991)  \emph{Introduction to Statistical Quality Control}, 2nd ed, New York, John Wiley & Sons. \cr
-Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process
-Control}, New York, Chapman and Hall.
+Burr, I.W. (1969) Control charts for measurements with varying sample sizes. \emph{Journal of Quality Technology}, 1(3), 163-167. \cr
+Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. \cr
+Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
 \author{Luca Scrucca \email{luca@stat.unipg.it}}
 %\note{}

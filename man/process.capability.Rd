@@ -39,9 +39,8 @@ Confidence limits for \eqn{C_{pm}}{C_pm} are based on the method of Boyles (1991
 Bissell, A.F. (1990) \emph{How reliable is your capability index?}, Applied Statistics, 39, 331-340. \cr
 Boyles, R.A. (1991) \emph{The Taguchi capability index}, Journal of Quality Technology, 23, 107-126. \cr
 Chou, Y., Owen D.B. and Borrego S.A. (1990) \emph{Lower Confidence Limits on Process Capability Indices}, Journal of Quality Technology, 22, 223-229. \cr
-Montgomery, D.C. (1991) \emph{Introduction to Statistical Quality Control}, 2nd
-ed, New York, John Wiley & Sons. \cr
-Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}, New York, Chapman and Hall. 
+Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. \cr
+Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
 \author{Luca Scrucca \email{luca@stat.unipg.it}}
 \seealso{\code{\link{process.capability.sixpack}}, \code{\link{qcc}}}

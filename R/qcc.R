@@ -15,7 +15,7 @@
 #  Main function to create a `qcc' object
 #
 
-"qcc" <- function(data, type, std.dev, sizes, limits, target, data.name, labels, newdata, newsizes, newlabels, nsigmas = 3, confidence.level, rules = shewhart.rules, plot = TRUE, ...)
+"qcc" <- function(data, type, sizes, center, std.dev, limits, target, data.name, labels, newdata, newsizes, newlabels, nsigmas = 3, confidence.level, rules = shewhart.rules, plot = TRUE, ...)
 {
   call <- match.call()
   if (missing(data))
@@ -46,8 +46,8 @@
      stop(paste("function", stats, "is not defined"))
   stats <- do.call(stats, list(data, sizes))
   statistics <- stats$statistics
-  center <- stats$center
-
+  if (missing(center)) center <- stats$center
+  
   if (missing(std.dev)) 
      { sd <- paste("sd.", type, sep = "")
        if (!exists(sd, mode="function"))
@@ -131,8 +131,7 @@
 
   if (!missing(target)) 
      if (!is.null(target))
-        { center <- target
-          object$target <- target }
+        object$target <- target 
 
   if (is.function(rules)) violations <- rules(object)
   else                    violations <- NULL
@@ -223,8 +222,7 @@
   type <- object$type
   std.dev <- object$std.dev
   data.name <- object$data.name
-  center <- if (is.null(object$target)) object$center
-            else                        object$target
+  center <- object$center
   stats <- object$statistics
   limits <- object$limits 
   lcl <- limits[,1]
@@ -240,14 +238,6 @@
      else
         statistics <- newstats   
   
-  oldpar <- par(no.readonly = TRUE)
-  if (restore.par) on.exit(par(oldpar))
-
-  par(bg=.qcc.options$bg.margin, cex=.qcc.options$cex)
-  if (add.stats) 
-     { mar = par("mar")
-       par(mar=mar+c(max(4, length(violations)), 0,0,0)) }
-
   if (missing(title))
      { if (is.null(newstats))
             main.title <- paste(type, "Chart\nfor", data.name)
@@ -260,6 +250,14 @@
   indices <- 1:length(statistics)
   indcs <- c(indices - 1/2, max(indices) + 1/2)
 
+  oldpar <- par(bg  = .qcc.options$bg.margin, 
+                cex = .qcc.options$cex,
+                mar = if(add.stats)
+                           par("mar")+c(max(4, length(violations)), 0,0,0)
+                      else par("mar"),
+                no.readonly = TRUE)
+  if (restore.par) on.exit(par(oldpar))
+
   # plot Shewhart chart
   plot(indices, statistics, type="n",
        ylim = if(!missing(ylim)) ylim 
@@ -270,7 +268,7 @@
        axes = FALSE, main = main.title)
   rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
        col = .qcc.options$bg.figure)
-  lines(indices, statistics, type = "o", pch=20) 
+  lines(indices, statistics, type = "b", pch=20) 
   axis(2, las = axes.las)
   nm.grp <- names(statistics)
   if (!length(nm.grp))
@@ -741,11 +739,10 @@
 "violating.runs" <- function(object, run.length = qcc.options("run.length"))
 {
 # Return indices of points violating runs
-  if (is.null(object$target)) target <- object$center
-  else                        target <- object$target
+  center <- object$center
   statistics <- c(object$statistics, object$new.statistics)
   cl <- object$limits
-  diffs <- statistics - target
+  diffs <- statistics - center
   diffs[diffs > 0] <- 1
   diffs[diffs < 0] <- -1
   runs <- rle(diffs)
@@ -837,13 +834,12 @@
        else main.title <- paste("Cusum Chart\nfor", object$newdata.name)
      }
 
-  oldpar <- par(no.readonly = TRUE)
+  oldpar <- par(bg  = .qcc.options$bg.margin, 
+                cex = .qcc.options$cex,
+                mar = if(add.stats) pmax(par("mar"), c(9,0,0,0))
+                      else          par("mar"),
+                no.readonly = TRUE)
   if (restore.par) on.exit(par(oldpar))
-
-  par(bg=.qcc.options$bg.margin, cex=.qcc.options$cex)
-  if (add.stats) 
-     { mar = par("mar")
-       par(mar=pmax(mar, c(9,0,0,0))) }
 
   plot(indices, cusum.pos, type="n",
        ylim = range(cusum.pos, cusum.neg, ldb, udb, ylim),
@@ -863,20 +859,20 @@
      { lind <- length(indices)
        lines(indices[1:set.to.zero], 
              cusum.pos[1:set.to.zero], 
-             type = "o", pch=20)
+             type = "b", pch=20)
        lines(indices[(set.to.zero + 1):lind], 
              cusum.pos[(set.to.zero + 1):lind],
-             type = "o", pch=20)
+             type = "b", pch=20)
        lines(indices[1:set.to.zero], 
              cusum.neg[1:set.to.zero], 
-             type = "o", pch=20)
+             type = "b", pch=20)
        lines(indices[(set.to.zero + 1):lind], 
              cusum.neg[(set.to.zero + 1):lind],
-             type = "o", pch=20)
+             type = "b", pch=20)
      }
   else 
-     { lines(indices, cusum.pos, type = "o", pch=20)
-       lines(indices, cusum.neg, type = "o", pch=20) }
+     { lines(indices, cusum.pos, type = "b", pch=20)
+       lines(indices, cusum.neg, type = "b", pch=20) }
 
   mtext("Cumulative Sum", line=3, side=2)
   mtext("Above Target", srt=90, line=2, side=2, at=0+par("usr")[4]/2)
@@ -960,7 +956,7 @@
 # z_t = lambda*y_t + (1-lambda)*z_t-1      
 # 
 # where 0<= lambda <=1 is the parameter which controls the weights applied 
-# to the data, and target is the starting value.
+# to the data, and start is the starting value.
 # Returns a list with elements:
 # x = ordered x-values
 # y = smoothed fitted values of y
@@ -989,7 +985,7 @@
 
 # "ewma.default" <- function (object, ...) ewmaSmooth(object, ...)
 
-"ewma.qcc" <- function(object, lambda = 0.2, nsigmas=object$nsigmas, 
+"ewma.qcc" <- function(object, lambda = 0.2, nsigmas = object$nsigmas, 
                        add.stats = TRUE, xlab, ylab, ylim = NULL, 
                        axes.las = 0, restore.par = TRUE, ...)
 {
@@ -1027,13 +1023,12 @@
      main.title <- paste("EWMA Chart\nfor", data.name, 
                          "and", object$newdata.name)
      
-  oldpar <- par(no.readonly = TRUE)
+  oldpar <- par(bg  = .qcc.options$bg.margin, 
+                cex = .qcc.options$cex,
+                mar = if(add.stats) pmax(par("mar"), c(9,0,0,0))
+                      else          par("mar"),
+                no.readonly = TRUE)
   if (restore.par) on.exit(par(oldpar))
- 
-  par(bg=.qcc.options$bg.margin, cex=.qcc.options$cex)
-  if (add.stats) 
-     { mar = par("mar")
-       par(mar=pmax(mar, c(9,0,0,0))) }
 
   plot(indices, statistics, type="n",
        ylim = range(statistics, lcl, ucl, center, ylim), 
@@ -1051,7 +1046,7 @@
   lines(indices, ucl, lty=2)
   lines(indices, lcl, lty=2)
   abline(h=center, lty=1)
-
+  
   if (!is.null(object$new.statistics))
      { len.obj.stats <- length(object$statistics)
        len.new.stats <- length(statistics) - len.obj.stats
@@ -1156,12 +1151,17 @@
   rownames(beta) <- paste("n=",n,sep="")
   colnames(beta) <- c
 
-  plot(c, beta[1,], type = "l", 
+  oldpar <- par(bg=.qcc.options$bg.margin, no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+  plot(c, beta[1,], type="n",
        ylim = c(0,1), xlim = c(0,max(c)),
-       main = "OC curves for xbar chart", 
        xlab = "Process shift (std.dev)",
-       ylab = "Prob. type II error ")
-  for (i in 2:length(n))
+       ylab = "Prob. type II error ",
+       main = paste("OC curves for", object$type, "chart"))
+  rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
+       col = .qcc.options$bg.figure)
+  for (i in 1:length(n))
       lines(c, beta[i,], type = "l", lty=i)
   beta <- t(beta)
   names(dimnames(beta)) <- c("shift (std.dev)", "sample size")
@@ -1176,8 +1176,9 @@
        apply(as.matrix(labels[i$ind]), 1, cat, "\n")
      }
   else
-     { legend(max(c),1, legend = paste("n =", n), 
-              lty = 1:length(n), xjust = 1, yjust = 1) 
+     { legend(max(c), 1, legend = paste("n =", n), 
+              bg = .qcc.options$bg.figure,
+              lty = 1:length(n), xjust = 1, yjust = 1)
      }  
   invisible(beta)
 }
@@ -1206,10 +1207,17 @@
   beta <- pbinom(UCL, size, p) - pbinom(LCL-1, size, p)
   names(beta) <- p
   
-  plot(p, beta, type = "l", 
+  oldpar <- par(bg=.qcc.options$bg.margin, no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+  plot(p, beta, type = "n", 
        ylim = c(0,1), xlim = c(0,1),
        main = paste("OC curves for", object$type, "chart"), 
-       xlab = expression(p), ylab = "Prob. type II error ")
+       xlab = expression(p), 
+       ylab = "Prob. type II error ")
+  rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
+       col = .qcc.options$bg.figure)
+  lines(p, beta)
   lines(rep(p[which.max(beta)], 2), c(0, max(beta)), lty = 2)
   
   warning("Some computed values for the type II error have been rounded due to the discreteness of the binomial distribution. Thus, some ARL values might be meaningless.")
@@ -1252,10 +1260,16 @@
   lambda <- seq(0, max.lambda)
   beta <- ppois(UCL, lambda) - ppois(LCL-1, lambda)
   names(beta) <- lambda
-  plot(lambda, beta, type = "l", 
+
+  oldpar <- par(bg=.qcc.options$bg.margin, no.readonly = TRUE)
+  on.exit(par(oldpar))
+  
+  plot(lambda, beta, type = "n", 
        ylim = c(0,1), xlim = range(lambda),
        main = paste("OC curves for", object$type, "chart"), 
-       xlab = "Mean", ylab = "Prob. type II error ")
+       xlab = "Mean", 
+       ylab = "Prob. type II error ")
+  lines(lambda, beta)     
   lines(rep(lambda[which.max(beta)], 2), c(0, max(beta)), lty = 2)
 
   warning("Some computed values for the type II error have been rounded due to the discreteness of the Poisson distribution. Thus, some ARL values might be meaningless.")
@@ -1285,7 +1299,7 @@
   if ((missing(object)) | (!inherits(object, "qcc")))
      stop("an object of class 'qcc' is required")
   if (!(object$type=="xbar" | object$type=="xbar.one"))
-     stop("Process Capability Analysis only available for xbar and xbar.one charts")
+     stop("Process Capability Analysis only available for charts type \"xbar\" and \"xbar.one\" charts")
 
   x <- as.vector(object$data)
   x <- x[!is.na(x)]
@@ -1307,9 +1321,8 @@
           target <- mean(spec.limits, na.rm=TRUE)
        else
           target <- object$target }
-  else
-     { if (target < LSL | target > USL)
-          warning("target value is not within specification limits...") }
+  if (target < LSL | target > USL)
+     warning("target value is not within specification limits...") 
          
   if (missing(nsigmas))
      if (is.null(object$nsigmas))
@@ -1365,12 +1378,14 @@
   rownames(tab) <- c("Cp", "Cp_l", "Cp_u", "Cp_k", "Cpm")
   colnames(tab) <- c("Value", names(Cp.limits))
 
-  oldpar <- par(no.readonly = TRUE)
+  oldpar <- par(bg  = .qcc.options$bg.margin, 
+                cex = .qcc.options$cex,
+                mar = if(add.stats) 
+                            c(9+is.null(center)*-1, 2, 4, 2) + 0.1
+                      else  par("mar"),
+                no.readonly = TRUE)
   if (restore.par) on.exit(par(oldpar))
 
-  par(bg=.qcc.options$bg.margin, cex=.qcc.options$cex)
-  if (add.stats) 
-     par(mar = c(9+is.null(center)*-1, 2, 4, 2) + 0.1)
   plot(0, 0, type="n", xlim = xlim, ylim = ylim,
        axes = FALSE, ylab="", xlab = "", main = title)
   usr <- par()$usr
@@ -1479,8 +1494,6 @@
 }
                
     
-
-
 "process.capability.sixpack" <- function(object, spec.limits, target, nsigmas, std.dev)
 {
 # Process capability sixpack plots (based on an idea in Minitab)
@@ -1523,9 +1536,9 @@
   par(mar=c(5,4,2,1), cex=.qcc.options$cex)
 
   # 1)
-  Object <- qcc(object$data, type=object$type, std.dev=std.dev,
-                nsigmas=nsigmas, target=target, data.name = object$data.name, 
-                plot=FALSE)
+  Object <- qcc(object$data, type=object$type, center=object$center,
+                std.dev=std.dev, target=target, nsigmas=nsigmas, 
+                data.name = object$data.name, plot=FALSE)
   plot(Object, add.stats = FALSE, chart.all = TRUE, restore.par = FALSE)
   
   # 2)
@@ -1578,7 +1591,7 @@
      text(usr[1], 1, paste("Cpm  = ", signif(pcap$indices[5,1], 3), sep = ""),
           pos=4, font=1, cex=1)
 
-  return()
+  return(invisible())
 }
 
 
@@ -1590,7 +1603,7 @@
 #                                                                   #
 #-------------------------------------------------------------------#
 
-"pareto.chart" <- function(x, ylab = "Frequency", xlab, ylim, main, col = heat.colors(length(x)), print=TRUE, ...)
+"pareto.chart" <- function(x, ylab = "Frequency", xlab, ylim, main, col = heat.colors(length(x)), ...)
 {
   call <- match.call(expand.dots = TRUE)
   varname <- deparse(substitute(x))
@@ -1614,9 +1627,6 @@
   if (missing(col))
      col <- heat.colors(length(x))
     
-  oldpar <- par(no.readonly = TRUE)
-  on.exit(par(oldpar))
-
   # set las and mar if not provided by user
   w <- max(sapply(names(x), nchar))
   if (is.null(call$las)) las <- 3 else las <- call$las
@@ -1624,11 +1634,12 @@
      { if (las==1) mar <- c(0,1,0,2)  
        else        mar <- c(log(max(w),2),1,0,2) }
   else mar <- call$mar
-  par(mar=par()$mar+mar, las=las)
+  oldpar <- par(mar = par("mar")+mar, las = las, no.readonly = TRUE)
+  on.exit(par(oldpar))
 
-  pc <- barplot(x, width=1, space=0.2, ylim=ylim, main = main, 
-                ylab = ylab, xlab = xlab, col = col, ...)
-  # adding line for percentage level overvrite bars...
+  pc <- barplot(x, width = 1, space = 0.2, main = main, 
+                ylim = ylim, ylab = ylab, xlab = xlab, col = col, ...)
+  # adding line for percentage level overwrite bars...
   abline(h=q[2:5], col="lightgrey")
   # ... so we redraw bars (not nice but works!)
   rect(pc-0.5, rep(0,length(x)), pc+0.5, x, col = col)
@@ -1637,18 +1648,13 @@
   axis(4, at=q, las=3, labels=paste(seq(0,1,length=5)*100,"%",sep=""))
   mtext("Cumulative Percentage", 4, line=2.5, las=3) 
 
-  if (print)
-      { tab <- cbind(x[!missing], cumsum.x, 
-                     x[!missing]/max(cumsum.x)*100, 
-                     cumsum.x/max(cumsum.x)*100) 
-        colnames(tab) <- c("Frequency", "Cum.Freq.", 
-                           "Percentage", "Cum.Percent.") 
-        cat(paste("Pareto Chart analysis for", varname, "\n"))
-        print(tab)
-      }
-                                
-  invisible(list(freq=x, cumfreq=cumsum.x, missing=missing))
-
+  tab <- cbind(x[!missing], cumsum.x, 
+               x[!missing]/max(cumsum.x)*100, 
+               cumsum.x/max(cumsum.x)*100) 
+  colnames(tab) <- c("Frequency", "Cum.Freq.", 
+                     "Percentage", "Cum.Percent.")
+  names(dimnames(tab)) <- c("", paste("\nPareto chart analysis for", varname))
+  return(tab)
 }
 
 
@@ -1673,6 +1679,9 @@
   ncup <- nc - round(nc/2)
   nclo <- nc - ncup
   ncc <- max(sapply(cause, length))
+
+  oldpar <- par(mar=c(1,1,3,1), no.readonly = TRUE)
+  on.exit(par(oldpar))
 
   plot(0:100, 0:100, type="n", xlab="", ylab="", axes=FALSE, main=title)
   usr <- par("usr")
@@ -1788,8 +1797,7 @@
 {
   if(nargs() == 0) return(.qcc.options)
   current <- .qcc.options
-  if (is.list(...)) temp <- ...
-  else              temp <- list(...)
+  temp <- list(...)
   if(length(temp) == 1 && is.null(names(temp))) 
     { arg <- temp[[1]]
       switch(mode(arg),

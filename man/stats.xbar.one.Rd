@@ -27,9 +27,8 @@ The function \code{sd.xbar.one} returns \code{std.dev} the standard deviation of
 The function \code{limits.xbar.one} returns a matrix with lower and upper control limits. 
 }
 \references{
-Montgomery, D.C. (1991)  \emph{Introduction to Statistical Quality Control}, 2nd ed, New York, John Wiley & Sons. \cr
-Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process
-Control}, New York, Chapman and Hall.
+Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. \cr
+Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
 \author{Luca Scrucca \email{luca@stat.unipg.it}}
 %\note{}

@@ -16,9 +16,8 @@ cause.and.effect(cause, effect, title = "Cause-and-Effect diagram",
 %\details{}
 %\value{}
 \references{
-Montgomery, D.C. (1991) \emph{Introduction to Statistical Quality Control}, 2nd
-ed, New York, John Wiley & Sons. \cr
-Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}, New York, Chapman and Hall.
+Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. \cr
+Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
 \author{Luca Scrucca \email{luca@stat.unipg.it}}
 \examples{

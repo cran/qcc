@@ -4,7 +4,7 @@
 \description{Plot a Pareto chart.}
 \usage{
 pareto.chart(x, ylab = "Frequency", xlab, ylim, main, 
-             col = heat.colors(length(x)), print = TRUE, \dots)
+             col = heat.colors(length(x)), \dots)
 }
 \arguments{
 \item{x}{a vector of values. \code{names(x)} are used for labelling the bars.}
@@ -12,15 +12,13 @@ pareto.chart(x, ylab = "Frequency", xlab, ylim, main,
 \item{xlab}{a string specifying the label for the x-axis.}
 \item{ylim}{a numeric vector specifying the limits for the y-axis.}
 \item{main}{a string specifying the main title to appear on the plot.}   \item{col}{a value for the color, a vector of colors, or a palette for the bars. See the help for \code{colors} and \code{palette}.}
-\item{print}{logical, if \code{TRUE} a frequency table distribution for \code{x} is printed.}
 \item{\dots}{other graphical arguments to be passed to the \code{barplot} function.}
 }
+\value{Returns a matrix containing the descriptive statistics used to draw the Pareto chart.}
 \details{A Pareto chart is a barplot where the categories are ordered in non increasing order, and a line is also added to show the cumulative sum.}
 %\value{}
 \references{
-Montgomery, D.C. (1991) \emph{Introduction to Statistical Quality Control}, 2nd
-ed, New York, John Wiley & Sons. \cr
-Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}, New York, Chapman and Hall.
+Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. 
 }
 \author{Luca Scrucca \email{luca@stat.unipg.it}}
 \seealso{\code{\link{barplot}}}
