@@ -1,0 +1,31 @@
+cause.and.effect        Cause and effect diagram
+circuit                 Circuit boards data
+cusum.qcc               Cusum chart
+dyedcloth               Dyed cloth data
+ewma.qcc                EWMA chart
+ewmaSmooth              EWMA smoothing function
+oc.curves               Operating Characteristic Function
+orangejuice2            Orange juice data -- Part 2
+orangejuice             Orange juice data
+pareto.chart            Pareto chart
+pcmanufact              Personal computer manufacturer data
+pistonrings             Piston rings data
+process.capability      Process capability analysis
+process.capability.sixpack
+                        Process capability sixpack plots
+qcc.groups              Grouping data based on a sample indicator
+qcc.options             Set or return options for the 'qcc' package.
+qcc.overdispersion.test
+                        Overdispersion test for binomial and poisson
+                        data
+qcc                     Quality Control Charts
+shewhart.rules          Functions specifying rules for Shewhart charts
+stats.c                 Functions to plot Shewhart c chart
+stats.np                Functions to plot Shewhart np chart
+stats.p                 Functions to plot Shewhart p chart
+stats.R                 Functions to plot Shewhart R chart
+stats.S                 Functions to plot Shewhart S chart
+stats.u                 Functions to plot Shewhart u chart
+stats.xbar.one          Functions to plot Shewhart xbar chart for
+                        one-at-time data
+stats.xbar              Functions to plot Shewhart xbar chart
