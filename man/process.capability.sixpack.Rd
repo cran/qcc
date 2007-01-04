@@ -2,7 +2,6 @@
 \alias{process.capability.sixpack}
 \title{Process capability sixpack plots}
 \description{Draw a process capability sixpack plots.}
-}
 \usage{
 process.capability.sixpack(object, spec.limits, target, nsigmas, std.dev)
 }

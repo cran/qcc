@@ -1,3 +1,20 @@
+Changes to Version 1.2
+
+   o Redefined 'std.dev' argument in qcc() function. It now allows to give
+     a numerical value or a sting identifying a method for estimating the 
+     standard deviation of a continuous process variable. Thus, these 
+     methods are only available to "xbar", "R", and "S" charts. For details
+     see help(qcc).
+     Functions involved in change are std.xbar(), std.R(), std.S(), while
+     the other sd.* functions only have "..." argument added.
+
+   o Fixed bug in highlighting violating runs and out of control points 
+     when chart.all = FALSE.
+
+   o Changed background color for Control Charts.
+
+   o Changed position of control limit labels in Shewhat and CusSum charts.
+
 Changes to Version 1.1
 
    o Added functions to plot Shewhart g chart (geometric distribution):

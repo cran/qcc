@@ -7,7 +7,7 @@
 \description{These functions are used to compute statistics required by the c chart.}
 \usage{
 stats.c(data, sizes)
-sd.c(data, sizes)
+sd.c(data, sizes, ...)
 limits.c(center, std.dev, sizes, conf)
 }
 \arguments{
@@ -16,6 +16,7 @@ limits.c(center, std.dev, sizes, conf)
   \item{sizes}{samples sizes.}
   \item{std.dev}{within group standard deviation.}
   \item{conf}{a numeric value used to compute control limits, specifying the number of standard deviations (if \code{conf} > 1) or the confidence level (if 0 < \code{conf} < 1).}
+  \item{...}{further arguments are ignored.}
 }
 %\details{}
 \value{

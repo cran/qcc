@@ -20,12 +20,12 @@ qcc.overdispersion.test
                         Overdispersion test for binomial and poisson
                         data
 shewhart.rules          Functions specifying rules for Shewhart charts
+stats.R                 Functions to plot Shewhart R chart
+stats.S                 Functions to plot Shewhart S chart
 stats.c                 Functions to plot Shewhart c chart
 stats.g                 Functions to plot Shewhart g chart
 stats.np                Functions to plot Shewhart np chart
 stats.p                 Functions to plot Shewhart p chart
-stats.R                 Functions to plot Shewhart R chart
-stats.S                 Functions to plot Shewhart S chart
 stats.u                 Functions to plot Shewhart u chart
 stats.xbar              Functions to plot Shewhart xbar chart
 stats.xbar.one          Functions to plot Shewhart xbar chart for

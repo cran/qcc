@@ -18,7 +18,7 @@ oc.curves.c(object, nsigmas = object$nsigmas, identify = FALSE, restore.par=TRUE
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 \item{object}{an object of class `qcc'.}
-\item{identify}{logical specifying whether to intercatively identify points on the plot (see help for \code{\link{identify}}).}
+\item{identify}{logical specifying whether to interactively identify points on the plot (see help for \code{\link{identify}}).}
 \item{n}{a vector of values specifying the sample sizes for which to draw the OC curves.}
 \item{c}{a vector of values specifying the multipliers for sigma in case of continuous variable.}
 \item{nsigmas}{a numeric value specifying th number of sigmas to use for computing control limits.}
@@ -26,7 +26,6 @@ oc.curves.c(object, nsigmas = object$nsigmas, identify = FALSE, restore.par=TRUE
 \item{\dots}{}
 }
 \details{An operating characteristic curve graphically provides information about the probability of not detecting a shift in the process. \code{oc.curves} is a generic function which calls the proper function depending on the type of `qcc' object. Further arguments provided through \dots are passed to the specific function depending on the type of chart.}
-}
 \value{The function invisibly returns a matrix or a vector of beta values, the probability of type II error.}
 \references{
 Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. \cr

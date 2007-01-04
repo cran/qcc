@@ -2,7 +2,6 @@
 \alias{process.capability}
 \title{Process capability analysis}
 \description{Computes process capability indices for a `qcc' object of type \code{"xbar"} and plot the histogram.}
-}
 \usage{
 process.capability(object,spec.limits, target, std.dev, nsigmas, 
                    confidence.level = 0.95, breaks = "scott", 

@@ -15,7 +15,7 @@ limits.xbar.one(center, std.dev, sizes, conf)
   \item{center}{sample/group center statistic.}
   \item{sizes}{samples sizes. Not needed, size=1 is used.}
   \item{k}{number of successive pairs of observations for computing the standard deviation based on moving ranges of k points.}
-  \item{std.dev}{within group standard deviation. Optional for \code{sd.xbar.one} function, required for \code{limits.xbar.one}}
+  \item{std.dev}{within group standard deviation. Optional for \code{sd.xbar.one} function, required for \code{limits.xbar.one}.}
   \item{conf}{a numeric value used to compute control limits, specifying the number of standard deviations (if \code{conf} > 1) or the confidence level (if 0 < \code{conf} < 1).}
 }
 %\details{}

@@ -1,13 +1,11 @@
-"stats.g" <-
-  function (data, sizes) 
+"stats.g" <- function (data, sizes) 
 {
   statistics <- as.vector(data)
   center <- mean(statistics)
   list(statistics = statistics, center = center)
 }
 
-"sd.g" <-
-  function (data, sizes) 
+"sd.g" <- function (data, sizes, ...)
 {
   data <- as.vector(data)
   p <- 1/mean(data)

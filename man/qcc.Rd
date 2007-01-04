@@ -30,13 +30,14 @@ qcc(data, type, sizes, center, std.dev, limits, target,
 \tabular{lll}{
               \tab Statistic charted   \tab Chart description \cr
 \code{"xbar"} \tab mean                \tab means of a continuous process variable \cr
-\code{"S"}    \tab standard deviation  \tab standard deviations of a continuous variable \cr
 \code{"R"}    \tab range               \tab ranges of a continuous process variable \cr
+\code{"S"}    \tab standard deviation  \tab standard deviations of a continuous variable \cr
 \code{"xbar.one"} \tab mean            \tab one-at-time data of a continuous process variable \cr
 \code{"p"}    \tab proportion          \tab proportion of nonconforming units \cr
 \code{"np"}   \tab count               \tab number of nonconforming units \cr
 \code{"c"}    \tab count               \tab nonconformities per unit \cr
-\code{"u"}    \tab count               \tab average nonconformities per unit
+\code{"u"}    \tab count               \tab average nonconformities per unit \cr
+\code{"g"}    \tab count               \tab number of non-events between events
 }
 }
 
@@ -44,7 +45,9 @@ qcc(data, type, sizes, center, std.dev, limits, target,
 
 \item{center}{a value specifying the center of group statistics.}
 
-\item{std.dev}{a value or a vector of values specifying the within-group standard deviation(s) of the process.}
+\item{std.dev}{a value or an available method specifying the within-group standard deviation(s) of the process. \cr
+Several methods are available for estimating the standard deviation in case of \code{"xbar"}, \code{"R"}, and \code{"S"} charts (see \code{\link{sd.xbar}}).
+}
 
 \item{limits}{a two-values vector specifying control limits.}
 

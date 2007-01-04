@@ -10,7 +10,7 @@
 }
 \usage{
 stats.g(data, sizes)
-sd.g(data, sizes)
+sd.g(data, sizes, ...)
 limits.g(center, std.dev, sizes, conf)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -22,6 +22,7 @@ limits.g(center, std.dev, sizes, conf)
   \item{conf}{ a numeric value used to compute control limits,
     specifying the number of standard deviations (if 'conf' > 1) or the
     confidence level (if 0 < 'conf' < 1).}
+  \item{...}{further arguments are ignored.}
 }
 \value{
   The function \code{stats.g()} returns a list with components \code{statistics} and \code{center}.

@@ -7,15 +7,14 @@
 \description{These functions are used to compute statistics required by the R chart.}
 \usage{
 stats.R(data, sizes)
-sd.R(data, sizes, std.dev, equal.sd = TRUE)
+sd.R(data, sizes, std.dev = c("UWAVE-R", "MVLUE-R"))
 limits.R(center, std.dev, sizes, conf)
 }
 \arguments{
   \item{data}{the observed data values}
   \item{center}{sample/group center statistic.}
   \item{sizes}{samples sizes. Optional}
-  \item{std.dev}{within group standard deviation. Optional for \code{sd.R} function, required for \code{limits.R}}
-  \item{equal.sd}{a logical indicating whether the standard deviation is constant for all samples/groups.}
+  \item{std.dev}{within group standard deviation. Optional for \code{sd.R} function, required for \code{limits.R}. See \code{\link{sd.xbar}}.}
   \item{conf}{a numeric value used to compute control limits, specifying the number of standard deviations (if \code{conf} > 1) or the confidence level (if 0 < \code{conf} < 1).}
 }
 %\details{}
