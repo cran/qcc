@@ -100,7 +100,7 @@ Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New Y
 }
 \author{Luca Scrucca \email{luca@stat.unipg.it}}
 %\note{ ~~further notes~~ }
-\seealso{\code{\link{shewhart.rules}}, \code{\link{cusum}}, \code{\link{ewma}}, \code{\link{process.capability}}, \code{\link{qcc.groups}} }
+\seealso{\code{\link{shewhart.rules}}, \code{\link{cusum}}, \code{\link{ewma}}, \code{\link{oc.curves}}, \code{\link{process.capability}}, \code{\link{qcc.groups}} }
 \examples{
 data(pistonrings)
 attach(pistonrings)

@@ -6,12 +6,13 @@
 \description{
 These functions are used to signal out of control points in Shewhart charts.}
 \usage{
-shewhart.rules(object, run.length = qcc.options("run.length"))
-beyond.limits(object)
+shewhart.rules(object, limits = object$limits, run.length = qcc.options("run.length"))
+beyond.limits(object, limits = object$limits)
 violating.runs(object, run.length = qcc.options("run.length"))
 }
 \arguments{
   \item{object}{an object of class `qcc'.}
+  \item{limits}{control limits}
   \item{run.length}{the maximum value of a run before to signal a
   point as out of control.}
 }

@@ -33,8 +33,13 @@ The available options are:
 
 \item{\code{bg.figure}}{background color used to draw the figure of the charts.}
 
-\item{\code{cex}}{character expansion used to draw labels, title, statistics at the bottom of plot produced by this package.}
-} 
+\item{\code{cex}}{character expansion used to draw plot annotations (labels, title, tickmarks, etc.).}
+
+\item{\code{font.stats}}{font used to draw text at the bottom of control charts.}
+
+\item{\code{cex.stats}}{character expansion used to draw text at the bottom of control charts.}
+
+}
 }
 \value{
 If the functions is called with no argument return a list of available options. 

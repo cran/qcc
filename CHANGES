@@ -1,4 +1,19 @@
-Changes to Version 1.0-0
+Changes to Version 1.1
+
+   o Added functions to plot Shewhart g chart (geometric distribution):
+     stats.g(), sd.g(), limits.g()
+     Contributed by Greg Snow (greg.snow@ihc.com).
+     
+   o Bug fix in violating.runs()
+   
+   o Changes in qcc.options():
+     - run.length set by default at 7 (it was 5 previously)
+     - 'font.stats' and 'cex.stats' control font and character expansion
+       used to draw text at the bottom of control charts
+
+   o Added qcc_Rnews.pdf paper in doc directory
+   
+Changes to Version 1.0
 
    o Fixed some minor bugs
    

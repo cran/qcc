@@ -1,6 +1,8 @@
 #-----------------------------------------------------------------------------#
-#                                                                             # #                  Some Models for Process Variation                          #
-#                                                                             # # Reference:                                                                  #
+#                                                                             # 
+#                  Some Models for Process Variation                          #
+#                                                                             #
+# Reference:                                                                  #
 # Wetherill, G.B. and Brown, D.W. (1991) ``Statistical Process Control'',     #
 #   New York, Chapman and Hall, Chapter 3                                     #
 #-----------------------------------------------------------------------------#
@@ -133,11 +135,11 @@ qcc.demo.trends <- function()
 {
   cat("# 4) Trends \n")
   cat("#            x_ij = mu + W_i + sigma_W * epsilon_ij \n")
-  cat("#    where W_i = 0.5 * i  \n")
+  cat("#    where W_i = 0.2 * i  \n")
   mu <- 100
   sigma.W <- 10
   epsilon <- rnorm(500)
-  W <- rep(0.5*1:100, rep(5,100))
+  W <- rep(0.2*1:100, rep(5,100))
   x <- mu + W + sigma.W*epsilon
   x <- matrix(x, ncol=10, byrow=TRUE)
   pause()

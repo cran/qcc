@@ -9,11 +9,11 @@
 oc.curves(object, \dots)
 
 oc.curves.xbar(object, n, c = seq(0, 5, length=101), 
-               nsigmas = object$nsigmas, identify=FALSE)
+               nsigmas = object$nsigmas, identify=FALSE, restore.par=TRUE)
 
-oc.curves.p(object, nsigmas = object$nsigmas, identify = FALSE)
+oc.curves.p(object, nsigmas = object$nsigmas, identify = FALSE, restore.par=TRUE)
 
-oc.curves.c(object, nsigmas = object$nsigmas, identify = FALSE)
+oc.curves.c(object, nsigmas = object$nsigmas, identify = FALSE, restore.par=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,6 +22,7 @@ oc.curves.c(object, nsigmas = object$nsigmas, identify = FALSE)
 \item{n}{a vector of values specifying the sample sizes for which to draw the OC curves.}
 \item{c}{a vector of values specifying the multipliers for sigma in case of continuous variable.}
 \item{nsigmas}{a numeric value specifying th number of sigmas to use for computing control limits.}
+\item{restore.par}{a logical value indicating whether the previous \code{par} settings must be restored. If you need to add points, lines, etc. to a chart set this to \code{FALSE}.}
 \item{\dots}{}
 }
 \details{An operating characteristic curve graphically provides information about the probability of not detecting a shift in the process. \code{oc.curves} is a generic function which calls the proper function depending on the type of `qcc' object. Further arguments provided through \dots are passed to the specific function depending on the type of chart.}
