@@ -3,7 +3,7 @@
 \alias{sd.g}
 \alias{limits.g}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Functions to plot Shewhart g chart }
+\title{Statistics used in computing and drawing a Shewhart g chart}
 \description{
   These functions are used to compute statistics required by the g chart
   (geometric distribution) for use with the qcc package.

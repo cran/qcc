@@ -12,16 +12,15 @@
 #-----------------------------------------------------------------------------#
 
 #
-#  Main function to create a `qcc' object
+#  Main function to create a 'qcc' object
 #
 
-"qcc" <- function(data, type, sizes, center, std.dev, limits, target, data.name, labels, newdata, newsizes, newlabels, nsigmas = 3, confidence.level, rules = shewhart.rules, plot = TRUE, ...)
+qcc <- function(data, type = c("xbar", "R", "S", "xbar.one", "p", "np", "c", "u", "g"), sizes, center, std.dev, limits, data.name, labels, newdata, newsizes, newlabels, nsigmas = 3, confidence.level, rules = shewhart.rules, plot = TRUE, ...)
 {
   call <- match.call()
   if (missing(data))
      stop("'data' argument is not specified")
-  if (missing(type))
-     stop("'type' of chart is not specified")
+  type <- match.arg(type)
 
   if (missing(data.name)) 
      data.name <- deparse(substitute(data))
@@ -52,10 +51,14 @@
   if (!exists(sd, mode="function"))
      stop(paste("function", sd, "is not defined!"))
   if (missing(std.dev)) 
-     { if(type == "xbar")   std.dev <- "UWAVE-R"
-       else if(type == "R") std.dev <- "UWAVE-R"
-       else if(type == "S") std.dev <- "UWAVE-SD"
-       else                 std.dev <- NULL
+     { std.dev <- NULL
+       std.dev <- switch(type, 
+                         "xbar" = { if(any(sizes > 25)) "RMSDF"
+                                    else                "UWAVE-R" },
+                         "xbar.one" = "MR",
+                         "R" = "UWAVE-R",
+                         "S" = "UWAVE-SD",
+                         NULL)
        std.dev <- do.call(sd, list(data, sizes, std.dev)) }
   else 
      { if (is.character(std.dev))
@@ -68,8 +71,9 @@
   names(statistics) <-  rownames(data) <-  labels
   names(dimnames(data)) <- list("Group", "Samples")
 
-  object <- list(call = call, data.name = data.name, data = data, 
-                 type = type, statistics = statistics, sizes = sizes, 
+  object <- list(call = call, type = type, 
+                 data.name = data.name, data = data, 
+                 statistics = statistics, sizes = sizes, 
                  center = center, std.dev = std.dev)
   # check for new data provided and update object
   if (!missing(newdata))
@@ -97,7 +101,7 @@
                { newlabels <- rownames(newdata) }
           }
        names(newstats) <- newlabels
-       object$new.statistics <- newstats
+       object$newstats <- newstats
        object$newdata  <- newdata
        object$newsizes <- newsizes
        object$newdata.name <- newdata.name
@@ -134,11 +138,6 @@
   lcl <- limits[,1]
   ucl <- limits[,2]
   object$limits <- limits
-
-  if (!missing(target)) 
-     if (!is.null(target))
-        object$target <- target 
-
   if (is.function(rules)) violations <- rules(object)
   else                    violations <- NULL
   object$violations <- violations
@@ -148,18 +147,18 @@
   return(object)
 }
 
-"summary.qcc" <- function(object, ...) print(object, ...)
+print.qcc <- function(x, ...) str(x,1)
 
-"print.qcc" <- function(x, ...)
+summary.qcc <- function(object, digits =  getOption("digits"), ...)
 {
-  object <- x   # Argh.  Really want to use 'object' anyway
+  #object <- x   # Argh.  Really want to use 'object' anyway
   cat("\nCall:\n",deparse(object$call),"\n\n",sep="")
   data.name <- object$data.name
   type <- object$type
   cat(paste(type, "chart for", data.name, "\n"))
   statistics <- object$statistics
   cat("\nSummary of group statistics:\n")
-  print(summary(statistics), ...)
+  print(summary(statistics), digits = digits, ...)
   sizes <- object$sizes
   if(length(unique(sizes))==1)
      sizes <- sizes[1]
@@ -171,20 +170,21 @@
          print(matrix(c(as.numeric(names(tab)), tab), 
                       ncol = length(tab), byrow = TRUE, 
                       dimnames = list(c("  sizes", "  counts"),
-                      character(length(tab)))), ...)
+                      character(length(tab)))), 
+               digits = digits, ...)
         }
   cat("\nNumber of groups: ", length(statistics))
   center <- object$center
-  cat("\nCenter of group statistics: ", format(center))
+  cat("\nCenter of group statistics: ", format(center, digits = digits))
   sd <- object$std.dev
-  cat("\nStandard deviation: ", format(sd), "\n")
+  cat("\nStandard deviation: ", format(sd, digits = digits), "\n")
 
   newdata.name <- object$newdata.name
-  new.statistics <- object$new.statistics
-  if (!is.null(new.statistics)) 
+  newstats <- object$newstats
+  if (!is.null(newstats)) 
      { cat(paste("\nSummary of group statistics in ", 
                  newdata.name, ":\n", sep = ""))
-       print(summary(new.statistics), ...)
+       print(summary(newstats), digits = digits, ...)
        newsizes <- object$newsizes
        if (!any(diff(newsizes)))
           newsizes <- newsizes[1]
@@ -196,27 +196,26 @@
              print(matrix(c(as.numeric(names(new.tab)), new.tab),
                           ncol = length(new.tab), byrow = TRUE, 
                           dimnames = list(c("  sizes", "  counts"),
-                                          character(length(new.tab)))), ...)
+                                          character(length(new.tab)))), 
+                   digits = digits, ...)
            }
-       cat("\nNumber of groups: ", length(new.statistics), "\n")
+       cat("\nNumber of groups: ", length(newstats), "\n")
      }
-
-  if (!is.null(object$target))
-     cat(paste("\nTarget value:", format(object$target), "\n"))
 
   limits <- object$limits
   if (!is.null(limits)) 
      { cat("\nControl limits:\n")
-       print(limits, ...) }
+       .printShortMatrix(limits, digits = digits, ...) }
 
   invisible()
 }
 
 
-"plot.qcc" <- function(x, add.stats = TRUE, chart.all = TRUE, 
-                       label.limits = c("LCL ", "UCL"),
-                       title, xlab, ylab, ylim, axes.las = 0,
-                       restore.par = TRUE, ...) 
+plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE, 
+                     label.limits = c("LCL ", "UCL"),
+                     title, xlab, ylab, ylim, axes.las = 0,
+                     digits =  getOption("digits"),
+                     restore.par = TRUE, ...) 
 {
   object <- x  # Argh.  Really want to use 'object' anyway
   if ((missing(object)) | (!inherits(object, "qcc")))
@@ -231,33 +230,35 @@
   limits <- object$limits 
   lcl <- limits[,1]
   ucl <- limits[,2]
-  newstats <- object$new.statistics
+  newstats <- object$newstats
   newdata.name <- object$newdata.name
   violations <- object$violations
-  if (chart.all) 
-     statistics <- c(stats, newstats)
+  if(chart.all) 
+    { statistics <- c(stats, newstats)
+      indices <- 1:length(statistics) }
   else
-     { if (is.null(newstats))
-          statistics <- stats
+     { if(is.null(newstats))
+         { statistics <- stats
+           indices <- 1:length(statistics) }
        else
-          statistics <- newstats }
-     
+         { statistics <- newstats 
+           indices <- seq(length(stats)+1, length(stats)+length(newstats)) }
+     }
+   
   if (missing(title))
      { if (is.null(newstats))
             main.title <- paste(type, "Chart\nfor", data.name)
        else if (chart.all)
                  main.title <- paste(type, "Chart\nfor", data.name, 
                                      "and", newdata.name)
-            else main.title <- paste(type, "Chart\nfor", newdata.name) }
+            else main.title <- paste(type, "Chart\nfor", newdata.name) 
+     }
   else main.title <- paste(title)
 
-  indices <- 1:length(statistics)
-  indcs <- c(indices - 1/2, max(indices) + 1/2)
-
-  oldpar <- par(bg  = .qcc.options$bg.margin, 
-                cex = .qcc.options$cex,
+  oldpar <- par(bg  = qcc.options("bg.margin"), 
+                cex = qcc.options("cex"),
                 mar = if(add.stats)
-                           par("mar")+c(max(4, length(violations)), 0,0,0)
+                           pmax(par("mar"), c(8.5,0,0,0))
                       else par("mar"),
                 no.readonly = TRUE)
   if (restore.par) on.exit(par(oldpar))
@@ -266,128 +267,125 @@
   plot(indices, statistics, type="n",
        ylim = if(!missing(ylim)) ylim 
               else range(statistics, limits, center),
-       xlim = range(indcs), 
        ylab = if(missing(ylab)) "Group summary statistics" else ylab,
        xlab = if(missing(xlab)) "Group" else xlab, 
        axes = FALSE, main = main.title)
   rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
-       col = .qcc.options$bg.figure)
-  lines(indices, statistics, type = "b", pch=20) 
+       col = qcc.options("bg.figure"))
+  axis(1, at = indices, las = axes.las,
+       labels = if(is.null(names(statistics))) 
+                   as.character(indices) else names(statistics))
   axis(2, las = axes.las)
-  nm.grp <- names(statistics)
-  if (!length(nm.grp))
-     nm.grp <- as.character(indices)
-  axis(1, at = indices, labels = nm.grp, las = axes.las)
   box()
 
-  if (length(center) == 1)
-       abline(h = center)
-  else lines(indcs, c(center, center[length(center)]), type="s")
+  lines(indices, statistics, type = "b", pch=20) 
 
-  if (length(lcl) == 1) 
-     { abline(h = lcl, lty = 2)
-       abline(h = ucl, lty = 2) }
+  if(length(center) == 1)
+       abline(h = center)
+  else lines(indices, c(center, center[length(center)]), type="s")
+
+  if(length(lcl) == 1) 
+    { abline(h = lcl, lty = 2)
+     abline(h = ucl, lty = 2) }
   else 
-     { if (chart.all)
-          { lines(indcs, c(lcl, lcl[length(lcl)]), type="s", lty = 2)
-            lines(indcs, c(ucl, ucl[length(ucl)]), type="s", lty = 2) }
-       else     
-          { abline(h = lcl[length(lcl)], lty = 2)
-            abline(h = ucl[length(ucl)], lty = 2) }
-     }
-  # text(rep(par("usr")[1], 2), c(lcl[1], ucl[1]), label.limits, pos=4, col="darkgray")
+    { lines(indices, lcl[indices], type="s", lty = 2)
+      lines(indices, ucl[indices], type="s", lty = 2) }
   mtext(label.limits, side = 4, at = c(rev(lcl)[1], rev(ucl)[1]), 
         las = 1, line = 0.1, col = gray(0.3))
   mtext("CL", side = 4, at = rev(center)[1], 
         las = 1, line = 0.1, col = gray(0.3))
 
-  if (is.null(.qcc.options$violating.runs))
+  if(is.null(qcc.options("violating.runs")))
      stop(".qcc.options$violating.runs undefined. See help(qcc.options).")
-  if (length(violations$violating.runs))
-     { v <- violations$violating.runs
-       if (!chart.all & !is.null(newstats))
-          { v <- v - length(stats) }
-       points(indices[v], statistics[v], 
-              col=.qcc.options$violating.runs$col, 
-              pch=.qcc.options$violating.runs$pch) }
-  if (is.null(.qcc.options$beyond.limits))
+  if(length(violations$violating.runs))
+    { v <- violations$violating.runs
+      if(!chart.all & !is.null(newstats))
+        { v <- v - length(stats) }
+      points(indices[v], statistics[v], 
+             col = qcc.options("violating.runs")$col, 
+             pch = qcc.options("violating.runs")$pch) 
+    }
+
+  if(is.null(qcc.options("beyond.limits")))
      stop(".qcc.options$beyond.limits undefined. See help(qcc.options).")
-  if (length(violations$beyond.limits))
-     { v <- violations$beyond.limits
-        if (!chart.all & !is.null(newstats))
-          { v <- v - length(stats) }
-       points(indices[v], statistics[v], 
-              col=.qcc.options$beyond.limits$col, 
-              pch=.qcc.options$beyond.limits$pch) }
+  if(length(violations$beyond.limits))
+    { v <- violations$beyond.limits
+      if(!chart.all & !is.null(newstats))
+        { v <- v - length(stats) }
+      points(indices[v], statistics[v], 
+             col = qcc.options("beyond.limits")$col, 
+             pch = qcc.options("beyond.limits")$pch) 
+    }
 
-  if (chart.all & (!is.null(newstats)))
-     { len.obj.stats <- length(object$statistics)
-       len.new.stats <- length(statistics) - len.obj.stats
-       abline(v = len.obj.stats + 0.5, lty = 3)
-       mtext(paste("Calibration data in", data.name), 
-             at = len.obj.stats/2, adj = 0.5, cex=0.8)
-       mtext(paste("New data in", object$newdata.name),  
-             at = len.obj.stats + len.new.stats/2, adj = 0.5, cex=0.8)
-     }
+  if(chart.all & (!is.null(newstats)))
+    { len.obj.stats <- length(object$statistics)
+      len.new.stats <- length(statistics) - len.obj.stats
+      abline(v = len.obj.stats + 0.5, lty = 3)
+      mtext(paste("Calibration data in", data.name), 
+            at = len.obj.stats/2, adj = 0.5, cex=0.8)
+      mtext(paste("New data in", object$newdata.name),  
+            at = len.obj.stats + len.new.stats/2, adj = 0.5, cex=0.8)
+    }
 
-  if (add.stats) 
-     { # computes the x margins of the figure region
-       plt <- par()$plt; usr <- par()$usr
-       px <- diff(usr[1:2])/diff(plt[1:2])
-       xfig <- c(usr[1]-px*plt[1], usr[2]+px*(1-plt[2]))
-       at.col <- xfig[1] + diff(xfig[1:2])*c(0.10, 0.40, 0.65)
-       # write info at bottom
-       mtext(paste("Number of groups = ", length(statistics), sep = ""), 
-             side = 1, line = 5, adj = 0, at=at.col[1],
-             font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       center <- object$center
-       if (length(center) == 1)
-          mtext(paste("Center = ", signif(center[1], options()$digits), sep = ""),
-                side = 1, line = 6, adj = 0, at=at.col[1],
-                font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
+  if(add.stats) 
+    { # computes the x margins of the figure region
+      plt <- par()$plt; usr <- par()$usr
+      px <- diff(usr[1:2])/diff(plt[1:2])
+      xfig <- c(usr[1]-px*plt[1], usr[2]+px*(1-plt[2]))
+      at.col <- xfig[1] + diff(xfig[1:2])*c(0.10, 0.40, 0.65)
+      # write info at bottom
+      mtext(paste("Number of groups = ", length(statistics), sep = ""), 
+            side = 1, line = 5, adj = 0, at = at.col[1],
+            font = qcc.options("font.stats"),
+            cex = qcc.options("cex.stats"))
+      center <- object$center
+      if(length(center) == 1)
+        { mtext(paste("Center = ", signif(center[1], digits), sep = ""),
+                side = 1, line = 6, adj = 0, at = at.col[1],
+                font = qcc.options("font.stats"),
+                cex = qcc.options("cex.stats"))
+        }
+      else 
+        { mtext("Center is variable", 
+                side = 1, line = 6, adj = 0, at = at.col[1],
+                qcc.options("font.stats"),
+                cex = qcc.options("cex.stats"))
+        }
+      mtext(paste("StdDev = ", signif(std.dev, digits), sep = ""),
+            side = 1, line = 7, adj = 0, at = at.col[1],
+            font = qcc.options("font.stats"),
+            cex = qcc.options("cex.stats"))
+       if(length(unique(lcl)) == 1)
+          mtext(paste("LCL = ", signif(lcl[1], digits), sep = ""), 
+                side = 1, line = 6, adj = 0, at = at.col[2],
+                font = qcc.options("font.stats"),
+                cex = qcc.options("cex.stats"))
        else 
-          mtext("Center is variable", 
-                side = 1, line = 6, adj = 0, at=at.col[1],
-                font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       mtext(paste("StdDev = ", signif(std.dev, options()$digits), sep = ""),
-             side = 1, line = 7, adj = 0, at=at.col[1],
-             font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       target <- object$target
-       if (!is.null(target))
-          { if (length(target) == 1)
-                mtext(paste("Target = ", signif(target[1], options()$digits), 
-                            sep = ""),
-                      side = 1, line = 5, adj = 0, at=at.col[2], 
-                      font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-            else 
-                mtext("Target is variable", 
-                      side = 1, line = 5, adj = 0, at=at.col[2], 
-                      font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-          }
-       if (length(unique(lcl)) == 1)
-          mtext(paste("LCL = ", signif(lcl[1], options()$digits), sep = ""), 
-                side = 1, line = 6, adj = 0, at=at.col[2],
-                font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
+          mtext("LCL is variable", 
+                side = 1, line = 6, adj = 0, at = at.col[2],
+                font =qcc.options("font.stats"),
+                cex = qcc.options("cex.stats"))
+       if(length(unique(ucl)) == 1)
+          mtext(paste("UCL = ", signif(ucl[1], digits), sep = ""),
+                side = 1, line = 7, adj = 0, at = at.col[2],
+                font = qcc.options("font.stats"),
+                cex = qcc.options("cex.stats")) 
        else 
-          mtext("LCL is variable", side = 1, line = 6, adj = 0, at=at.col[2],
-                font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       if (length(unique(ucl)) == 1)
-          mtext(paste("UCL = ", signif(ucl[1], options()$digits), sep = ""),
-                side = 1, line = 7, adj = 0, at=at.col[2],
-                font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       else 
-          mtext("UCL is variable", side = 1, line = 7, adj = 0, at=at.col[2],
-                font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       if (!is.null(violations))
-          { mtext(paste("Number beyond limits =",
-                        length(unique(violations$beyond.limits))), 
-                  side = 1, line = 6, adj = 0, at = at.col[3],
-                  font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-            mtext(paste("Number violating runs =",
-                        length(unique(violations$violating.runs))), 
-                  side = 1, line = 7, adj = 0, at = at.col[3],
-                  font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-           }
+          mtext("UCL is variable", side = 1, line = 7, adj = 0, at = at.col[2],
+                font =qcc.options("font.stats"),
+                cex = qcc.options("cex.stats"))
+       if(!is.null(violations))
+         { mtext(paste("Number beyond limits =",
+                       length(unique(violations$beyond.limits))), 
+                 side = 1, line = 6, adj = 0, at = at.col[3],
+                 font = qcc.options("font.stats"),
+                 cex = qcc.options("cex.stats"))
+           mtext(paste("Number violating runs =",
+                       length(unique(violations$violating.runs))), 
+                 side = 1, line = 7, adj = 0, at = at.col[3],
+                 font = qcc.options("font.stats"),
+                 cex = qcc.options("cex.stats"))
+         }
      }
 
   invisible()
@@ -397,9 +395,12 @@
 #  Functions used to compute Shewhart charts statistics
 #
 
+.qcc.c4 <- function(n)
+{ sqrt(2/(n - 1)) * exp(lgamma(n/2) - lgamma((n - 1)/2)) }
+        
 # xbar
 
-"stats.xbar" <- function(data, sizes)
+stats.xbar <- function(data, sizes)
 {
   if (missing(sizes))
      sizes <- apply(data, 1, function(x) sum(!is.na(x)))
@@ -408,31 +409,29 @@
   list(statistics = statistics, center = center)
 }
 
-"sd.xbar" <- function(data, sizes, std.dev = c("UWAVE-R", "UWAVE-SD", "MVLUE-R", "MVLUE-SD", "RMSDF"))
+sd.xbar <- function(data, sizes, std.dev = c("UWAVE-R", "UWAVE-SD", "MVLUE-R", "MVLUE-SD", "RMSDF"))
 {
   if (!is.numeric(std.dev))
      std.dev <- match.arg(std.dev)
-  c4 <- function(n)
-        sqrt(2/(n - 1)) * exp(lgamma(n/2) - lgamma((n - 1)/2))
   if (missing(sizes))
      sizes <- apply(data, 1, function(x) sum(!is.na(x)))
   if (any(sizes == 1))
      stop("group sizes must be larger than one")
-
+  c4 <- .qcc.c4
   if (is.numeric(std.dev))
      { sd <- std.dev }
   else
      { switch(std.dev, 
               "UWAVE-R" = {  R <- apply(data, 1, function(x) 
                                                  diff(range(x, na.rm = TRUE)))
-                             d2 <- .qcc.options$exp.R.unscaled[sizes]
+                             d2 <- qcc.options("exp.R.unscaled")[sizes]
                              sd <- sum(R/d2)/length(sizes) }, 
               "UWAVE-SD" = { S <- apply(data, 1, sd, na.rm = TRUE)
                              sd <- sum(S/c4(sizes))/length(sizes) },
               "MVLUE-R"  = { R <- apply(data, 1, function(x) 
                                                  diff(range(x, na.rm = TRUE)))
-                             d2 <- .qcc.options$exp.R.unscaled[sizes]
-                             d3 <- .qcc.options$se.R.unscaled[sizes]
+                             d2 <- qcc.options("exp.R.unscaled")[sizes]
+                             d3 <- qcc.options("se.R.unscaled")[sizes]
                              w  <- (d2/d3)^2
                              sd <- sum(R/d2*w)/sum(w) }, 
               "MVLUE-SD" = { S <- apply(data, 1, sd, na.rm = TRUE)
@@ -456,7 +455,7 @@
   return(sd)
 }
 
-"limits.xbar" <- function(center, std.dev, sizes, conf)
+limits.xbar <- function(center, std.dev, sizes, conf)
 {
   if (length(unique(sizes))==1)
      sizes <- sizes[1]
@@ -481,7 +480,7 @@
 
 # S chart
 
-"stats.S" <- function(data, sizes)
+stats.S <- function(data, sizes)
 {
   if (missing(sizes))
      sizes <- apply(data, 1, function(x) sum(!is.na(x)))
@@ -492,19 +491,18 @@
   list(statistics = statistics, center = center)
 }
 
-"sd.S" <- function(data, sizes, std.dev = c("UWAVE-SD", "MVLUE-SD", "RMSDF"))
+sd.S <- function(data, sizes, std.dev = c("UWAVE-SD", "MVLUE-SD", "RMSDF"))
 {
   if (!is.numeric(std.dev))
      std.dev <- match.arg(std.dev)
   sd.xbar(data, sizes, std.dev)
 }
 
-"limits.S" <- function(center, std.dev, sizes, conf)
+limits.S <- function(center, std.dev, sizes, conf)
 {
   if (length(unique(sizes))==1)
      sizes <- sizes[1]
-  c4 <- function(n)
-        sqrt(2/(n - 1)) * exp(lgamma(n/2) - lgamma((n - 1)/2))
+  c4 <- .qcc.c4
   se.stats <- std.dev * sqrt(1 - c4(sizes)^2)
   if (conf >= 1) 
      { lcl <- pmax(0, center - conf * se.stats)
@@ -527,7 +525,7 @@
 
 # R Chart 
 
-"stats.R" <- function(data, sizes)
+stats.R <- function(data, sizes)
 {
   if (missing(sizes))
      sizes <- apply(data, 1, function(x) sum(!is.na(x)))
@@ -538,18 +536,18 @@
   list(statistics = statistics, center = center)
 }
 
-"sd.R" <- function(data, sizes, std.dev = c("UWAVE-R", "MVLUE-R"))
+sd.R <- function(data, sizes, std.dev = c("UWAVE-R", "MVLUE-R"))
 {
   if (!is.numeric(std.dev))
      std.dev <- match.arg(std.dev)
   sd.xbar(data, sizes, std.dev)
 }
 
-"limits.R" <- function(center, std.dev, sizes, conf)
+limits.R <- function(center, std.dev, sizes, conf)
 {
   if (length(unique(sizes))==1)
      sizes <- sizes[1]
-  se.R.unscaled <- .qcc.options$se.R.unscaled
+  se.R.unscaled <- qcc.options("se.R.unscaled")
   Rtab <- length(se.R.unscaled)
   if (conf >= 1) 
      { if (any(sizes > Rtab))
@@ -574,34 +572,39 @@
 
 # xbar Chart for one-at-time data
 
-"stats.xbar.one" <- function(data, sizes)
+stats.xbar.one <- function(data, sizes)
 {
   statistics <- as.vector(data)
   center <- mean(statistics)
   list(statistics = statistics, center = center)
 }
 
-"sd.xbar.one" <- function(data, sizes, std.dev, k = 2)
+sd.xbar.one <- function(data, sizes, std.dev = c("MR", "SD"), k = 2)
 {
   data <- as.vector(data)
   n <- length(data)
-  d2 <- .qcc.options$exp.R.unscaled
-  if (is.null(d2))
-     stop(".qcc.options$exp.R.unscaled is null")
-  if (missing(std.dev)) std.dev <- NULL
-  if (is.null(std.dev))
-     { d <- 0
-       for (j in k:n)
-           d <- d+abs(diff(range(data[c(j:(j-k+1))])))
-       var.within <- d/(n-k+1) 
-       std.dev <- var.within/d2[k] }
-  else 
-     { std.dev <- std.dev/d2[k] }
-  return(std.dev)
+  if(!is.numeric(std.dev)) 
+     std.dev <- match.arg(std.dev)
+  c4 <- .qcc.c4
+  if(is.numeric(std.dev)) 
+    { sd <- std.dev }
+  else
+    { switch(std.dev, 
+             "MR" = { d2 <- qcc.options("exp.R.unscaled")
+                      if(is.null(d2))
+                         stop(".qcc.options$exp.R.unscaled is null")
+                      d <- 0
+                      for(j in k:n)
+                          d <- d+abs(diff(range(data[c(j:(j-k+1))])))
+                      sd <- (d/(n-k+1))/d2[k] },
+             "SD" = { sd <- sd(data)/c4(n) },
+             sd <- NULL)
+    }
+  return(sd)
 }
 
 
-"limits.xbar.one" <- function(center, std.dev, sizes, conf)
+limits.xbar.one <- function(center, std.dev, sizes, conf)
 {
   se.stats <- std.dev
   if (conf >= 1) 
@@ -625,7 +628,7 @@
 
 # p Chart
 
-"stats.p" <- function(data, sizes)
+stats.p <- function(data, sizes)
 {
   data <- as.vector(data)
   sizes <- as.vector(sizes)
@@ -633,7 +636,7 @@
   list(statistics = data/sizes, center = pbar)
 }
 
-"sd.p" <- function(data, sizes, ...)
+sd.p <- function(data, sizes, ...)
 {
   data <- as.vector(data)
   sizes <- as.vector(sizes)
@@ -642,7 +645,7 @@
   return(std.dev)
 }
 
-"limits.p" <- function(center, std.dev, sizes, conf)
+limits.p <- function(center, std.dev, sizes, conf)
 { 
   # use normal approximation for computing control limits
   limits <- limits.xbar(center, std.dev, sizes, conf)
@@ -653,7 +656,7 @@
 
 # np Chart
 
-"stats.np" <- function(data, sizes)
+stats.np <- function(data, sizes)
 {
   data <- as.vector(data)
   sizes <- as.vector(sizes)
@@ -664,7 +667,7 @@
   list(statistics = data, center = center)
 }
 
-"sd.np" <- function(data, sizes, ...)
+sd.np <- function(data, sizes, ...)
 {
   data <- as.vector(data)
   sizes <- as.vector(sizes)
@@ -675,7 +678,7 @@
   return(std.dev)
 }
 
-"limits.np" <- function(center, std.dev, sizes, conf)
+limits.np <- function(center, std.dev, sizes, conf)
 { 
   # use normal approximation for computing control limits
   if (length(unique(sizes)) == 1)
@@ -691,7 +694,7 @@
 
 # c Chart
 
-"stats.c" <- function(data, sizes)
+stats.c <- function(data, sizes)
 {
   data <- as.vector(data)
   sizes <- as.vector(sizes)
@@ -702,14 +705,14 @@
   list(statistics = statistics, center = center)
 }
 
-"sd.c" <- function(data, sizes, ...)
+sd.c <- function(data, sizes, ...)
 {
   data <- as.vector(data)
   std.dev <- sqrt(mean(data))
   return(std.dev)
 }
 
-"limits.c" <- function(center, std.dev, sizes, conf)
+limits.c <- function(center, std.dev, sizes, conf)
 {
   if (conf >= 1) 
      { lcl <- center - conf * sqrt(center)
@@ -731,7 +734,7 @@
 
 # u Chart
 
-"stats.u" <- function(data, sizes)
+stats.u <- function(data, sizes)
 {
   data <- as.vector(data)
   sizes <- as.vector(sizes)
@@ -740,7 +743,7 @@
   list(statistics = statistics, center = center)
 }
 
-"sd.u" <- function(data, sizes, ...)
+sd.u <- function(data, sizes, ...)
 {
   data <- as.vector(data)
   sizes <- as.vector(sizes)
@@ -748,7 +751,7 @@
   return(std.dev)
 }
 
-"limits.u" <- function(center, std.dev, sizes, conf)
+limits.u <- function(center, std.dev, sizes, conf)
 {
   sizes <- as.vector(sizes)
   if (length(unique(sizes))==1)
@@ -768,7 +771,7 @@
 # Functions used to signal points out of control 
 #
 
-"shewhart.rules" <- function(object, limits = object$limits, run.length = qcc.options("run.length"))
+shewhart.rules <- function(object, limits = object$limits, run.length = qcc.options("run.length"))
 {
 # Return a list of cases beyond limits and violating runs
   bl <- beyond.limits(object, limits = limits)
@@ -776,10 +779,10 @@
   list(beyond.limits = bl, violating.runs = vr)
 }
 
-"beyond.limits" <- function(object, limits = object$limits)
+beyond.limits <- function(object, limits = object$limits)
 {
 # Return cases beyond limits
-  statistics <- c(object$statistics, object$new.statistics) 
+  statistics <- c(object$statistics, object$newstats) 
   lcl <- limits[,1]
   ucl <- limits[,2]
   index.above.ucl <- seq(along = statistics)[statistics > ucl]
@@ -787,11 +790,13 @@
   return(c(index.above.ucl, index.below.lcl))
 }
 
-"violating.runs" <- function(object, run.length = qcc.options("run.length"))
+violating.runs <- function(object, run.length = qcc.options("run.length"))
 {
 # Return indices of points violating runs
+  if(run.length == 0)
+    return(numeric())
   center <- object$center
-  statistics <- c(object$statistics, object$new.statistics)
+  statistics <- c(object$statistics, object$newstats)
   cl <- object$limits
   diffs <- statistics - center
   diffs[diffs > 0] <- 1
@@ -820,355 +825,11 @@
 
 #-------------------------------------------------------------------#
 #                                                                   #
-#                      CUSUM CHART                                  #
-#                                                                   #
-#-------------------------------------------------------------------#
-
-"cusum" <- function(object, ...) UseMethod("cusum")
-
-"cusum.default" <- function(object, ...) object
-
-"cusum.qcc" <- function(object, decision.int = 5, se.shift = 1, label.bounds = c("LDB", "UDB"), add.stats = TRUE, chart.all = TRUE, ylim = NULL, axes.las = 0, restore.par = TRUE, ...)
-{
-  if ((missing(object)) | (!inherits(object, "qcc")))
-     stop("an object of class 'qcc' is required")
-
-  # collect info from object
-  type <- object$type
-  std.dev <- object$std.dev
-  data.name <- object$data.name
-  center <- if (is.null(object$target)) object$center
-            else                        object$target
-  data.name <- object$data.name
-
-  set.to.zero <- 0
-  if (chart.all) 
-     { statistics <- c(object$statistics, object$new.statistics)
-       sizes <- c(object$sizes, object$newsizes)
-       set.to.zero <- length(object$statistics)  }
-  else 
-     { if (is.null(object$new.statistics)) 
-          { statistics <- object$statistics
-            sizes <- object$sizes }
-       else 
-          { statistics <- object$new.statistics
-            sizes <- object$newsizes  }
-     }
-
-  n <- length(statistics)
-  z <- (statistics - center)/(std.dev/sqrt(sizes))
-  ldb <-  - decision.int
-  udb <- decision.int
-  indices <- 1:length(statistics)
-  #
-  z.f <- z - se.shift/2
-  cusum.pos <- rep(NA, n)
-  cusum.pos[1] <- max(0, z.f[1])
-  for (i in 2:n)
-      cusum.pos[i] <- max(0, cusum.pos[i-1]+z.f[i])
-  #
-  z.f <- z + se.shift/2
-  cusum.neg <- rep(NA, n)
-  cusum.neg[1] <- max(0, -z.f[1])
-  for (i in 2:n)
-      cusum.neg[i] <- max(0, cusum.neg[i-1]-z.f[i])
-  cusum.neg <- -cusum.neg
-
-  if (is.null(object$new.statistics))
-     { main.title <- paste("Cusum Chart\nfor", data.name) }
-  else
-     { if (chart.all)
-            main.title <- paste("Cusum Chart\nfor", data.name,
-                                "and", object$newdata.name)
-       else main.title <- paste("Cusum Chart\nfor", object$newdata.name)
-     }
-
-  oldpar <- par(bg  = .qcc.options$bg.margin, 
-                cex = .qcc.options$cex,
-                mar = if(add.stats) pmax(par("mar"), c(9,0,0,0))
-                      else          par("mar"),
-                no.readonly = TRUE)
-  if (restore.par) on.exit(par(oldpar))
-
-  plot(indices, cusum.pos, type="n",
-       ylim = range(cusum.pos, cusum.neg, ldb, udb, ylim),
-       ylab = "", xlab = "Group", axes = FALSE, main=main.title)
-  rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
-       col = .qcc.options$bg.figure)
-  abline(h = 0, lwd = 2)
-  abline(h = c(ldb, udb), lty = 2)
-  nm.grp <- names(statistics)
-  if (!length(nm.grp))
-     nm.grp <- as.character(indices)
-  axis(1, at = indices, labels = nm.grp, las = axes.las)
-  axis(2, at=round(seq(par("usr")[3],par("usr")[4],by=1)), las = axes.las)
-  box()
-
-  if (chart.all) 
-     { lind <- length(indices)
-       lines(indices[1:set.to.zero], 
-             cusum.pos[1:set.to.zero], 
-             type = "b", pch=20)
-       lines(indices[(set.to.zero + 1):lind], 
-             cusum.pos[(set.to.zero + 1):lind],
-             type = "b", pch=20)
-       lines(indices[1:set.to.zero], 
-             cusum.neg[1:set.to.zero], 
-             type = "b", pch=20)
-       lines(indices[(set.to.zero + 1):lind], 
-             cusum.neg[(set.to.zero + 1):lind],
-             type = "b", pch=20)
-     }
-  else 
-     { lines(indices, cusum.pos, type = "b", pch=20)
-       lines(indices, cusum.neg, type = "b", pch=20) }
-
-  mtext("Cumulative Sum", line=3, side=2)
-  mtext("Above Target", srt=90, line=2, side=2, at=0+par("usr")[4]/2, cex=0.8)
-  mtext("Below Target", srt=90, line=2, side=2, at=0+par("usr")[3]/2, cex=0.8)
-  # text(rep(par("usr")[1],2), c(ldb, udb), label.bounds, pos=4, col="darkgray")
-  mtext(label.bounds, side = 4, at = c(ldb, udb), las = 1, line = 0.1, col = gray(0.3))
-
-  if (is.null(.qcc.options$beyond.limits))
-     stop(".qcc.options$beyond.limits undefined. See help(qcc.options).")
-  beyond.bounds <- list(upper=(cusum.pos > udb), lower=(cusum.neg < ldb))
-  n.beyond.bounds <- sum(beyond.bounds$upper) + sum(beyond.bounds$lower)
-  if (n.beyond.bounds > 0)
-     { v <- beyond.bounds$upper
-       points(indices[v], cusum.pos[v], 
-              col=.qcc.options$beyond.limits$col, 
-              pch=.qcc.options$beyond.limits$pch)
-       v <- beyond.bounds$lower
-       points(indices[v], cusum.neg[v], 
-              col=.qcc.options$beyond.limits$col, 
-              pch=.qcc.options$beyond.limits$pch) }
-
-  if (chart.all & !is.null(object$new.statistics))
-     { len.obj.stats <- length(object$statistics)
-       len.new.stats <- length(statistics) - len.obj.stats
-       abline(v = len.obj.stats + 0.5, lty = 3)
-       mtext(paste("Calibration Data in", data.name), cex=0.8,
-             at = len.obj.stats/2, line = 0, adj = 0.5)
-       mtext(paste("New Data in", object$newdata.name), cex=0.8, 
-             at = len.obj.stats + len.new.stats/2, line = 0, adj = 0.5)
-     }
-
-    if (add.stats) 
-       { # computes the x margins of the figure region
-         plt <- par()$plt; usr <- par()$usr
-         px <- diff(usr[1:2])/diff(plt[1:2])
-         xfig <- c(usr[1]-px*plt[1], usr[2]+px*(1-plt[2]))
-         at.col <- xfig[1] + diff(xfig[1:2])*c(0.15, 0.50)
-         # write info at bottom
-         mtext(paste("Number of groups = ", length(statistics), sep = ""),
-               side = 1, line = 5, adj = 0, at=at.col[1],
-               font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-         if (length(center) == 1)
-            mtext(paste("Target = ", 
-                        signif(center[1],options()$digits), sep = ""),
-                  side = 1, line = 6, adj = 0, at=at.col[1],
-                  font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-         else 
-            mtext("Target is variable", side = 1, line = 6, adj = 0,
-                  font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-         mtext(paste("StdDev = ", signif(std.dev, options()$digits), sep = ""),
-               side = 1, line = 7, adj = 0, at=at.col[1],
-               font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-         mtext(paste("Decision boundaries (std. err.) =", decision.int),
-               side = 1, line = 5, adj = 0, at=at.col[2],
-               font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-         mtext(paste("Shift detection (std. err.) =", 
-                     signif(se.shift, digits = options()$digits)), 
-               side = 1, line = 6, adj = 0, at=at.col[2], 
-               font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-         mtext(paste("No. of points beyond boundaries =", n.beyond.bounds),
-               side = 1, line = 7, adj = 0, at=at.col[2],
-               font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       }
-
-  object$cusum <- list(x = indices, 
-                       pos = cusum.pos, 
-                       neg = cusum.neg,
-                       decision.int = decision.int, 
-                       se.shift = se.shift)
-  class(object) <- c("cusum", "qcc")
-  invisible(object)
-}
-
-
-#-------------------------------------------------------------------#
-#                                                                   #
-#                       EWMA CHART                                  #
-#                                                                   #
-#-------------------------------------------------------------------#
-
-"ewmaSmooth" <- function(x, y, lambda=0.20, start, ...)
-{
-#
-# Exponential-Weighted Moving Average 
-# 
-# Return smooth values based on 
-# 
-# z_t = lambda*y_t + (1-lambda)*z_t-1      
-# 
-# where 0<= lambda <=1 is the parameter which controls the weights applied 
-# to the data, and start is the starting value.
-# Returns a list with elements:
-# x = ordered x-values
-# y = smoothed fitted values of y
-# 
-  if (length(y)!=length(x))
-     stop("x and y must have the same length!")
-  if (abs(lambda)>1)
-     stop("lambda parameter must be between 0 and 1")
-  ord <- order(x) 
-  x <- x[ord]
-  y <- y[ord]
-  n <- length(y)
-  if (missing(start)) start <- y[1]
-  
-  S1 <- diag(rep(1,n))
-  for (i in 1:(n-1))
-      {for (j in i:n)
-           { S1[j,i] <- (1-lambda)^(j-i) }}
-            
-  S2 <- (1-lambda)^seq(1,n)
-  z <- lambda*(S1%*%y) + S2*start
-  list(x=x, y=z, lambda=lambda, start=start)
-}
-
-"ewma" <- function (object, ...) UseMethod("ewma")
-
-# "ewma.default" <- function (object, ...) ewmaSmooth(object, ...)
-
-"ewma.qcc" <- function(object, lambda = 0.2, nsigmas = object$nsigmas, 
-                       add.stats = TRUE, xlab, ylab, ylim = NULL, 
-                       axes.las = 0, restore.par = TRUE, ...)
-{
-# Exponential-Weighted Moving Average Plot
-
-  if ((missing(object)) | (!inherits(object, "qcc")))
-     stop("an object of class `qcc' is required")
-  if (is.null(nsigmas))
-     stop("the object of class `qcc' does not contain nsigmas, so it must be provided as argument.")
-
-  # collect info from object
-  type <- object$type
-  std.dev <- object$std.dev
-  data.name <- object$data.name
-  center <- if (is.null(object$target)) object$center
-            else                        object$target
-  data.name <- object$data.name
-
-  statistics <- c(object$statistics, object$new.statistics)
-  sizes <- c(object$sizes, object$newsizes)
-
-  n <- length(statistics)
-  indices <- 1:length(statistics)
-
-  ewma <- ewmaSmooth(indices, statistics, lambda=lambda, start=center)
-  sigma2 <- std.dev^2/sizes * 
-            ((lambda/(2-lambda))*(1-(1-lambda)^(2*(1:n))))
-
-  ucl <- center + nsigmas*sqrt(sigma2)
-  lcl <- center - nsigmas*sqrt(sigma2)
-
-  if (is.null(object$new.statistics))
-     main.title <- paste("EWMA Chart\nfor", data.name)
-  else
-     main.title <- paste("EWMA Chart\nfor", data.name, 
-                         "and", object$newdata.name)
-
-  oldpar <- par(bg  = .qcc.options$bg.margin, 
-                cex = .qcc.options$cex,
-                mar = if(add.stats) pmax(par("mar"), c(9,0,0,0))
-                      else          par("mar"),
-                no.readonly = TRUE)
-  if (restore.par) on.exit(par(oldpar))
-
-  plot(indices, statistics, type="n",
-       ylim = range(statistics, lcl, ucl, center, ylim), 
-       xlim = range(indices), 
-       ylab = ifelse(missing(ylab), "Group Summary Statistics", ylab),
-       xlab = ifelse(missing(xlab), "Group", xlab),
-       axes = FALSE, main = main.title)
-  rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
-       col = .qcc.options$bg.figure)
-  axis(1, at = indices, labels = indices, las = axes.las)
-  axis(2, las = axes.las)
-  box()
-  points(indices, statistics, pch=20) 
-  lines(ewma$x, ewma$y)
-  lines(indices, ucl, lty=2)
-  lines(indices, lcl, lty=2)
-  abline(h=center, lty=1)
-
-  if (!is.null(object$new.statistics))
-     { len.obj.stats <- length(object$statistics)
-       len.new.stats <- length(statistics) - len.obj.stats
-       abline(v = len.obj.stats + 0.5, lty = 3)
-       mtext(paste("Calibration Data in", data.name), cex=0.8,
-             at = len.obj.stats/2, line = 0, adj = 0.5)
-       mtext(paste("New Data in", object$newdata.name), cex=0.8, 
-             at = len.obj.stats + len.new.stats/2, line = 0, adj = 0.5)
-     }
-
-  if (add.stats) 
-     { # computes the x margins of the figure region
-       plt <- par()$plt; usr <- par()$usr
-       px <- diff(usr[1:2])/diff(plt[1:2])
-       xfig <- c(usr[1]-px*plt[1], usr[2]+px*(1-plt[2]))
-       at.col <- xfig[1] + diff(xfig[1:2])*c(0.15, 0.60)
-       # write info at bottom
-       mtext(paste("Number of groups = ", length(statistics), sep = ""),
-             side = 1, line = 5, adj = 0, at=at.col[1],
-             font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       if (length(center) == 1)
-          mtext(paste("Target = ", 
-                      signif(center[1],options()$digits), sep = ""),
-                side = 1, line = 6, adj = 0, at=at.col[1],
-                font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       else 
-          mtext("Target is variable", side = 1, line = 6, adj = 0,
-                font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       mtext(paste("StdDev = ", signif(std.dev, options()$digits), sep = ""),
-             side = 1, line = 7, adj = 0, at=at.col[1],
-             font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       mtext(paste("Smoothing parameter = ", signif(lambda,5)),
-             side = 1, line = 5, adj = 0, at = at.col[2],
-             font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       # mtext(substitute(lambda==l, list(l=signif(lambda,5))),
-       #       side = 1, line = 5, adj = 0, at = at.col[2],
-       #       # at = par("usr")[1] + 0.5 * diff(par("usr")[1:2]),
-       #       font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       mtext(paste("Control limits at ", nsigmas, "*sigma", sep=""),
-             side = 1, line = 6, adj = 0, at = at.col[2],
-             font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-       # mtext(expression(paste("Control limits at ", eval(nsigmas), sigma)),
-       #       side = 1, line = 6, adj = 0, at = at.col[2],
-       #       font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-     }
-
-  object$ewma <- list(x = ewma$x, 
-                      y = { y <- as.vector(ewma$y)
-                            names(y) <- c(names(object$statistics),
-                                          names(object$new.statistics))
-                            y },                       
-                      sigma = sqrt(sigma2), nsigmas = nsigmas, 
-                      limits = { limits <- cbind(lcl,ucl)
-                                 colnames(limits) <- c("LCL", "UCL")
-                                 limits })
-  class(object) <- c("ewma", "qcc")
-  invisible(object)
-}
-
-#-------------------------------------------------------------------#
-#                                                                   #
 #          Operating Characteristic Function                        #
 #                                                                   #
 #-------------------------------------------------------------------#
 
-"oc.curves" <- function(object, ...)
+oc.curves <- function(object, ...)
 {
 # Draws the operating characteristic curves for the qcc object 
 
@@ -1193,7 +854,7 @@
   invisible(beta)
 }
 
-"oc.curves.xbar" <- function(object, n, c = seq(0, 5, length=101), nsigmas = object$nsigmas, identify=FALSE, restore.par=TRUE)
+oc.curves.xbar <- function(object, n, c = seq(0, 5, length=101), nsigmas = object$nsigmas, identify=FALSE, restore.par=TRUE)
 {
 # Draw the operating-characteristic curves for the xbar-chart with nsigmas
 # limits. The values on the vertical axis give the probability of not detecting
@@ -1215,8 +876,8 @@
   rownames(beta) <- paste("n=",n,sep="")
   colnames(beta) <- c
 
-  oldpar <- par(bg  = .qcc.options$bg.margin, 
-                cex = .qcc.options$cex,
+  oldpar <- par(bg  = qcc.options("bg.margin"), 
+                cex = qcc.options("cex"),
                 no.readonly = TRUE)
   if (restore.par) on.exit(par(oldpar))
   
@@ -1226,7 +887,7 @@
        ylab = "Prob. type II error ",
        main = paste("OC curves for", object$type, "chart"))
   rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
-       col = .qcc.options$bg.figure)
+       col = qcc.options("bg.figure"))
   for (i in 1:length(n))
       lines(c, beta[i,], type = "l", lty=i)
   beta <- t(beta)
@@ -1243,13 +904,13 @@
      }
   else
      { legend(max(c), 1, legend = paste("n =", n), 
-              bg = .qcc.options$bg.figure,
+              bg = qcc.options("bg.figure"),
               lty = 1:length(n), xjust = 1, yjust = 1)
      }
   invisible(beta)
 }
 
-"oc.curves.p" <- function(object, nsigmas = object$nsigmas, identify=FALSE, restore.par=TRUE)
+oc.curves.p <- function(object, nsigmas = object$nsigmas, identify=FALSE, restore.par=TRUE)
 {
   type <- object$type
   if (!(object$type=="p" | object$type=="np"))
@@ -1273,8 +934,8 @@
   beta <- pbinom(UCL, size, p) - pbinom(LCL-1, size, p)
   names(beta) <- p
 
-  oldpar <- par(bg  = .qcc.options$bg.margin, 
-                cex = .qcc.options$cex,
+  oldpar <- par(bg  = qcc.options("bg.margin"), 
+                cex = qcc.options("cex"),
                 no.readonly = TRUE)
   if (restore.par) on.exit(par(oldpar))
 
@@ -1284,7 +945,7 @@
        xlab = expression(p), 
        ylab = "Prob. type II error ")
   rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
-       col = .qcc.options$bg.figure)
+       col = qcc.options("bg.figure"))
   lines(p, beta)
   lines(rep(p[which.max(beta)], 2), c(0, max(beta)), lty = 2)
 
@@ -1300,7 +961,7 @@
   invisible(beta)  
 }
 
-"oc.curves.c" <- function(object, nsigmas = object$nsigmas, identify=FALSE, restore.par=TRUE)
+oc.curves.c <- function(object, nsigmas = object$nsigmas, identify=FALSE, restore.par=TRUE)
 {
   type <- object$type
   if (!(object$type=="c" | object$type=="u"))
@@ -1329,8 +990,8 @@
   beta <- ppois(UCL, lambda) - ppois(LCL-1, lambda)
   names(beta) <- lambda
 
-  oldpar <- par(bg  = .qcc.options$bg.margin, 
-                cex = .qcc.options$cex,
+  oldpar <- par(bg  = qcc.options("bg.margin"), 
+                cex = qcc.options("cex"),
                 no.readonly = TRUE)
   if(restore.par) on.exit(par(oldpar))
 
@@ -1340,7 +1001,7 @@
        xlab = "Mean", 
        ylab = "Prob. type II error ")
   rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
-       col = .qcc.options$bg.figure)
+       col = qcc.options("bg.figure"))
   lines(lambda, beta)     
   lines(rep(lambda[which.max(beta)], 2), c(0, max(beta)), lty = 2)
 
@@ -1356,471 +1017,13 @@
   invisible(beta)
 }
 
-
 #-------------------------------------------------------------------#
 #                                                                   #
-#    Process Capability Analysis                                    #
-#                                                                   #
-#-------------------------------------------------------------------#
-
-"process.capability" <- function(object, spec.limits, target, std.dev, nsigmas, confidence.level = 0.95, breaks="scott", add.stats=TRUE, print=TRUE, restore.par=TRUE)
-{
-# Computes process capability indices for a qcc object of type "xbar" 
-# and plot the histogram
-
-  if ((missing(object)) | (!inherits(object, "qcc")))
-     stop("an object of class 'qcc' is required")
-  if (!(object$type=="xbar" | object$type=="xbar.one"))
-     stop("Process Capability Analysis only available for charts type \"xbar\" and \"xbar.one\" charts")
-
-  x <- as.vector(object$data)
-  x <- x[!is.na(x)]
-  sizes <- object$sizes
-  center <- object$center
-  if (missing(std.dev))
-     std.dev <- object$std.dev
-  n <- length(x)
-  title <- paste("Process Capability Analysis\nfor", object$data.name)
-  if (missing(spec.limits))
-     stop("specification limits must be provided")
-  if (!length(spec.limits)==2)
-     stop("wrong specification limits format")
-  LSL <- min(spec.limits, na.rm=TRUE)
-  USL <- max(spec.limits, na.rm=TRUE)
-
-  if (missing(target))
-     { if (is.null(object$target))
-          target <- mean(spec.limits, na.rm=TRUE)
-       else
-          target <- object$target }
-  if (target < LSL | target > USL)
-     warning("target value is not within specification limits...") 
-  if (missing(nsigmas))
-     if (is.null(object$nsigmas))
-        stop("nsigmas not available in the 'qcc' object. Please provide nsigmas.") 
-     else  nsigmas <- object$nsigmas
-  if (confidence.level < 0 | confidence.level > 1)
-     stop("the argument confidence.level must be a value between 0 and 1") 
-
-  # computes process capability indices
-  Cp <- (USL - LSL) / (2*nsigmas*std.dev)
-  Cp.u <- (USL-center)/(nsigmas*std.dev)
-  Cp.l <- (center-LSL)/(nsigmas*std.dev)
-  Cp.k <- min(Cp.u, Cp.l)
-  # Cpm <- (USL - LSL) / (2*nsigmas*sqrt(sum((x-target)^2)/(n-1)))
-  Cpm <- Cp / sqrt(1+((center-target)/std.dev)^2)
-
-  # compute confidence limits 
-  alpha <- 1-confidence.level
-  Cp.limits   <- Cp*sqrt(qchisq(c(alpha/2, 1-alpha/2), n-1)/(n-1))
-  Cp.u.limits <- Cp.u*(1+c(-1,1)*qnorm(confidence.level)*
-                       sqrt(1/(9*n*Cp.u^2)+1/(2*(n-1))))
-  Cp.l.limits <- Cp.l*(1+c(-1,1)*qnorm(confidence.level)*
-                       sqrt(1/(9*n*Cp.l^2)+1/(2*(n-1))))
-  Cp.k.limits <- Cp.k*(1+c(-1,1)*qnorm(1-alpha/2)*
-                       sqrt(1/(9*n*Cp.k^2)+1/(2*(n-1))))
-  df <- n*(1+((center-target)/std.dev)^2)/
-          (1+2*((center-target)/std.dev)^2)
-  Cpm.limits <- Cpm*sqrt(qchisq(c(alpha/2, 1-alpha/2), df)/df)
-  names(Cp.limits) <- names(Cp.k.limits) <- names(Cpm.limits) <- 
-    c(paste(round(100*alpha/2, 1), "%", sep=""),
-      paste(round(100*(1-alpha/2), 1), "%", sep=""))
-
-  exp.LSL <- pnorm((LSL-center)/std.dev) * 100
-  if (exp.LSL < 0.01) exp.LSL <- 0
-  exp.USL <- (1-pnorm((USL-center)/std.dev)) * 100
-  if (exp.USL < 0.01) exp.USL <- 0
-  obs.LSL <- sum(x<LSL)/n * 100
-  obs.USL <- sum(x>USL)/n * 100
-  xlim <- range(x, USL, LSL, target)
-  xlim <- xlim+diff(xlim)*c(-0.1,0.1)
-  xx <- seq(min(xlim), max(xlim), length=100)
-  dx <- dnorm(xx, center, std.dev)
-  h <- hist(x, breaks = breaks, plot=FALSE) # compute histogram
-  ylim <- range(h$density, dx)
-  ylim <- ylim+diff(ylim)*c(0,0.05)
-
-  tab <- cbind(c(Cp, Cp.l, Cp.u, Cp.k, Cpm),
-               rbind(Cp.limits, Cp.l.limits, Cp.u.limits, 
-                     Cp.k.limits, Cpm.limits))
-  rownames(tab) <- c("Cp", "Cp_l", "Cp_u", "Cp_k", "Cpm")
-  colnames(tab) <- c("Value", names(Cp.limits))
-
-  oldpar <- par(bg  = .qcc.options$bg.margin, 
-                cex = .qcc.options$cex,
-                mar = if(add.stats) 
-                            c(9+is.null(center)*-1, 2, 4, 2) + 0.1
-                      else  par("mar"),
-                no.readonly = TRUE)
-  if (restore.par) on.exit(par(oldpar))
-
-  plot(0, 0, type="n", xlim = xlim, ylim = ylim,
-       axes = FALSE, ylab="", xlab = "", main = title)
-  usr <- par()$usr
-  rect(usr[1], usr[3], usr[2], usr[4], col=.qcc.options$bg.figure)
-  axis(1); box()
-  plot(h, add=TRUE, freq=FALSE) # draw histogram
-  # add graphical info
-  abline(v=c(LSL,USL), col=2, lty=3, lwd=2)
-  text(LSL, usr[4], "LSL", pos=1, col="darkgray", cex=0.8)
-  text(USL, usr[4], "USL", pos=1, col="darkgray", cex=0.8)
-  if (!is.null(target))
-     { abline(v=target, col=2, lty=2, lwd=2)
-       text(target, usr[4], "Target", pos=1, col="darkgray", cex=0.8) }
-  lines(xx, dx, lty=2)
-
-  if(add.stats) 
-    { # computes the x margins of the figure region
-      plt <- par()$plt
-      px <- diff(usr[1:2])/diff(plt[1:2])
-      xfig <- c(usr[1]-px*plt[1], usr[2]+px*(1-plt[2]))
-      at.col <- xfig[1] + diff(xfig[1:2])*c(0.07, 0.35, 0.56, 0.75)
-      # write info at bottom
-      #--
-      mtext(paste("Number of obs = ", n, sep = ""), 
-            side = 1, line = 3, adj = 0, at = at.col[1],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      mtext(paste("Center = ", signif(center, options()$digits), sep = ""), 
-            side = 1, line = 4, adj = 0, at = at.col[1],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      mtext(paste("StdDev = ", signif(std.dev, options()$digits), sep = ""), 
-            side = 1, line = 5, adj = 0, at = at.col[1],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      #--
-      if(!is.null(target))
-         msg <- paste("Target = ", signif(target, options()$digits), sep = "")
-      else
-         msg <- paste("Target = ", sep = "")     
-      mtext(msg, side = 1, line = 3, adj = 0, at=at.col[2],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      mtext(paste("LSL = ", signif(LSL, options()$digits), sep = ""), 
-            side = 1, line = 4, adj = 0, at = at.col[2],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      mtext(paste("USL = ", signif(USL, options()$digits), sep = ""), 
-            side = 1, line = 5, adj = 0, at = at.col[2],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      #--
-      mtext(paste("Cp     = ", signif(Cp, 3), sep = ""), 
-            side = 1, line = 3, adj = 0, at = at.col[3],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      mtext(paste("Cp_l  = ", signif(Cp.l, 3), sep = ""), 
-            side = 1, line = 4, adj = 0, at = at.col[3],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      mtext(paste("Cp_u = ", signif(Cp.u, 3), sep = ""), 
-            side = 1, line = 5, adj = 0, at = at.col[3],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      mtext(paste("Cp_k = ", signif(Cp.k, 3), sep = ""), 
-            side = 1, line = 6, adj = 0, at = at.col[3],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      if(!is.null(target))
-         mtext(paste("Cpm  = ", signif(Cpm, 3), sep = ""), 
-               side = 1, line = 7, adj = 0, at = at.col[3],
-               font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      #--
-      mtext(paste("Exp<LSL ", signif(exp.LSL, 2), "%", sep = ""), 
-            side = 1, line = 3, adj = 0, at = at.col[4],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      mtext(paste("Exp>USL ", signif(exp.USL, 2), "%", sep = ""), 
-            side = 1, line = 4, adj = 0, at = at.col[4],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      mtext(paste("Obs<LSL ", signif(obs.LSL, 2), "%", sep = ""), 
-            side = 1, line = 5, adj = 0, at = at.col[4],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-      mtext(paste("Obs>USL ", signif(obs.USL, 2), "%", sep = ""), 
-            side = 1, line = 6, adj = 0, at = at.col[4],
-            font=.qcc.options$font.stats, cex=.qcc.options$cex.stats)
-    }
-
-  if(print)
-    { cat("\nProcess Capability Analysis\n")
-      cat("\nCall:\n", deparse(match.call()), "\n\n", sep = "")
-      cat(paste(formatC("Number of obs = ", width=16), 
-                formatC(n, width=12, flag="-"), 
-                formatC("Target = ", width=10), 
-                formatC(target, digits=options()$digits, flag="-"),
-                "\n", sep=""))
-      cat(paste(formatC("Center = ", width=16), 
-                formatC(center, digits=options()$digits, width=12, flag="-"),
-                formatC("LSL = ", width=10), 
-                formatC(LSL, digits=options()$digits, flag="-"),
-                "\n", sep=""))
-      cat(paste(formatC("StdDev = ", width=16), 
-                formatC(std.dev, digits=options()$digits, width=12, flag="-"),
-                formatC("USL = ", width=10), 
-                formatC(USL, digits=options()$digits, flag="-"),
-                "\n", sep=""))
-      cat("\nCapability indices:\n\n")
-      print(tab, digits=4, na.print="", print.gap=2)
-      cat("\n")
-      cat(paste("Exp<LSL ", format(exp.LSL, digits=2), "%   ", 
-                "Obs<LSL ", format(obs.LSL, digits=2), "% \n", sep=""))
-      cat(paste("Exp>USL ", format(exp.USL, digits=2), "%   ", 
-                "Obs>USL ", format(obs.USL, digits=2), "% \n", sep=""))
-    }
-
-  invisible(list(nobs = n, center = center, std.dev = std.dev, 
-                 target=target, 
-                 spec.limits = { sl <- c(LSL, USL)
-                                 names(sl) <- c("LSL", "USL")
-                                 sl },
-                 indices = tab, 
-                 exp = { exp <- c(exp.LSL, exp.USL)/100
-                         names(exp) <- c("< LSL", "> USL")
-                         exp }, 
-                 obs = { obs <- c(obs.LSL, obs.USL)/100
-                         names(obs) <- c("< LSL", "> USL")
-                         obs }
-                 ))
-}
-
-"process.capability.sixpack" <- function(object, spec.limits, target, nsigmas, std.dev)
-{
-# Process capability sixpack plots (based on an idea in Minitab)
-
-  if ((missing(object)) | (!inherits(object, "qcc")))
-     stop("an object of class 'qcc' is required")
-  if (!object$type=="xbar")
-     stop("Sixpack analysis only available for 'qcc' object of type \"xbar\"")
-  if (missing(std.dev))
-     std.dev <- object$std.dev
-  if (missing(spec.limits))
-     stop("specification limits must be provided as vector of length two")
-  if (!length(spec.limits)==2)
-     stop("specification limits must be provided as vector of length two")
-  if (missing(target))
-     { if (is.null(object$target))
-          target <- mean(spec.limits, na.rm=TRUE)
-       else
-          target <- object$target }
-  else
-     { if (target < min(spec.limits) | target > max(spec.limits))
-          warning("target value is not within specification limits...") }
-
-  if (missing(nsigmas))
-     if (is.null(object$nsigmas))
-        stop("nsigmas not available in the 'qcc' object. Please provide nsigmas.") 
-     else  nsigmas <- object$nsigmas
-
-  bg.margin.old <- .qcc.options$bg.margin
-  bg.figure.old <- .qcc.options$bg.figure
-  .qcc.options$bg.margin <<- .qcc.options$bg.figure <<- "white"
-
-  oldpar <- par(no.readonly = TRUE)
-  on.exit({ .qcc.options$bg.margin <<- bg.margin.old
-            .qcc.options$bg.figure <<- bg.figure.old 
-            par(oldpar) })
-
-  layout(matrix(c(1,2,3,4,5,6),3,2), widths = c(2,1), heights=c(1,1,1))
-  # layout.show()
-  par(mar=c(5,4,2,1), cex=.qcc.options$cex)
-
-  # 1)
-  Object <- qcc(object$data, type=object$type, center=object$center,
-                std.dev=std.dev, target=target, nsigmas=nsigmas, 
-                data.name = object$data.name, plot=FALSE)
-  plot(Object, add.stats = FALSE, chart.all = TRUE, restore.par = FALSE)
-
-  # 2)
-  if (min(Object$sizes)>10) type.varchart <- "S" 
-  else                      type.varchart <- "R" 
-  q <- qcc(Object$data, type=type.varchart, std.dev=std.dev, nsigmas=nsigmas,
-           data.name = Object$data.name, plot=FALSE)
-  plot(q, add.stats = FALSE, restore.par = FALSE)
-
-  # 3)
-  runs <- max(1,nrow(Object$data)-25):nrow(Object$data)
-  matplot(Object$data[runs,], col=1, pch=1, cex=0.7, 
-          ylab=Object$data.name, xlab="Group", main="Run chart")
-  abline(h=Object$center, lty=2)
-
-  # 4)
-  pcap <- process.capability(Object, target=target, std.dev=std.dev,
-                             nsigmas=nsigmas, spec.limits=spec.limits,
-                             add.stats=FALSE, print=FALSE, restore.par=FALSE)
-  # 5)
-  qqnorm(Object$data)
-  qqline(Object$data)
-  # 6)
-  tol.limits <- c(Object$center-nsigmas*std.dev, 
-                  Object$center+nsigmas*std.dev)
-  par(mar=c(4,1,3,1))
-  xlim <- range(tol.limits, spec.limits, target)
-  xlim[1] <- xlim[1]-diff(xlim)
-  plot(0:7,0:7, type="n", xlim=xlim, xlab="", ylab="", axes=FALSE)
-  title("Capability plot")
-  axis(1)
-  text(mean(spec.limits), 2, "Specification limits", cex=1, font=1)
-  arrows(pcap$spec.limits[1], 1, pcap$spec.limits[2], 
-         1, length=0.1, angle=90, code=3)
-  if (!is.null(target))
-     points(target, 1, pch=3, cex=1)
-  text(mean(tol.limits), 4, "Process tolerance", cex=1, font=1)
-  arrows(tol.limits[1], 3,  tol.limits[2], 3, length=0.1, angle=90, code=3)
-  points(Object$center, 3, pch=3, cex=1)
-  usr <- par()$usr
-  text(usr[1], 6, paste("Center = ", signif(Object$center, options()$digits), sep = ""), pos=4, font=1, cex=1)
-  text(usr[1], 5, paste("StdDev = ", signif(std.dev, options()$digits), sep = ""), pos=4, font=1, cex=1)
-  if (!is.null(target))
-     text(usr[1], 4, paste("Target = ", signif(target, options()$digits), sep = ""), pos=4, font=1, cex=1)
-  text(usr[1], 3, paste("Cp   = ", signif(pcap$indices[1,1], 3), sep = ""),
-       pos=4, font=1, cex=1)
-  text(usr[1], 2, paste("Cp_k = ", signif(pcap$indices[4,1], 3), sep = ""),
-       pos=4, font=1, cex=1)
-  if (!is.null(target))
-     text(usr[1], 1, paste("Cpm  = ", signif(pcap$indices[5,1], 3), sep = ""),
-          pos=4, font=1, cex=1)
-
-  return(invisible())
-}
-
-
-
-
-#-------------------------------------------------------------------#
-#                                                                   #
-#                     PARETO CHART                                  #
+# Miscellaneous functions                                           #
 #                                                                   #
 #-------------------------------------------------------------------#
 
-"pareto.chart" <- function(x, ylab = "Frequency", xlab, ylim, main, col = heat.colors(length(x)), ...)
-{
-  call <- match.call(expand.dots = TRUE)
-  varname <- deparse(substitute(x))
-  x <- as.table(x)
-  if (length(dim(x))>1) 
-     stop("only one-dimensional object (table, vector, etc.) may be provided")
-
-  x <- sort(x, na.last=TRUE)
-  missing <- is.na(names(x))
-  x <- c(rev(x[!missing]), x[missing])
-  missing <- is.na(names(x))
-  cumsum.x <- cumsum(x[!missing]) 
-  q <- seq(0, max(cumsum.x), length=5)
-
-  if (missing(xlab)) 
-     xlab <- ""
-  if (missing(ylim)) 
-     ylim <- c(0, max(cumsum.x)*1.05)
-  if (missing(main)) 
-     main <- paste("Pareto Chart for", varname)
-  if (missing(col))
-     col <- heat.colors(length(x))
-
-  # set las and mar if not provided by user
-  w <- max(sapply(names(x), nchar))
-  if (is.null(call$las)) las <- 3 else las <- call$las
-  if (is.null(call$mar))
-     { if (las==1) mar <- c(0,1,0,2)  
-       else        mar <- c(log(max(w),2),1,0,2) }
-  else mar <- call$mar
-  oldpar <- par(mar = par("mar")+mar, 
-                las = las, 
-                cex = .qcc.options$cex,
-                no.readonly = TRUE)
-  on.exit(par(oldpar))
-
-  pc <- barplot(x, width = 1, space = 0.2, main = main, 
-                ylim = ylim, ylab = ylab, xlab = xlab, col = col, ...)
-  # adding line for percentage level overwrite bars...
-  abline(h=q[2:5], col="lightgrey")
-  # ... so we redraw bars (not nice but works!)
-  rect(pc-0.5, rep(0,length(x)), pc+0.5, x, col = col)
-  lines(pc[!missing], cumsum.x, type="b", cex=0.7)
-  box()
-  axis(4, at=q, las=3, labels=paste(seq(0,1,length=5)*100,"%",sep=""))
-  mtext("Cumulative Percentage", 4, line=2.5, las=3) 
-
-  tab <- cbind(x[!missing], cumsum.x, 
-               x[!missing]/max(cumsum.x)*100, 
-               cumsum.x/max(cumsum.x)*100) 
-  colnames(tab) <- c("Frequency", "Cum.Freq.", 
-                     "Percentage", "Cum.Percent.")
-  names(dimnames(tab)) <- c("", paste("\nPareto chart analysis for", varname))
-  return(tab)
-}
-
-
-#-------------------------------------------------------------------#
-#                                                                   #
-#                  Cause-and-Effect diagram                         #
-#                                                                   #
-#-------------------------------------------------------------------#
-
-"cause.and.effect" <- function(cause, effect, title = "Cause-and-Effect diagram", cex=c(1,0.9,1), font=c(1,3,2))
-{
-
-  # running mean of successive pairs of obs
-  mean2 <- function(x)
-  { m <- rep(NA, length(x)-1)
-    for (i in 1:(length(x)-1))
-         m[i] <- mean(x[c(i,i+1)])
-    return(m)
-  }
-
-  nc <- length(cause)
-  ncup <- nc - round(nc/2)
-  nclo <- nc - ncup
-  ncc <- max(sapply(cause, length))
-
-  oldpar <- par(mar=c(1,1,3,1), no.readonly = TRUE)
-  on.exit(par(oldpar))
-
-  plot(0:100, 0:100, type="n", xlab="", ylab="", axes=FALSE, main=title)
-  usr <- par("usr")
-  we <- strwidth(effect, units="user")*1.1
-  wc <- max(unlist(sapply(cause, strwidth, units="user")))
-  hc <- max(strheight(effect, units="user"),
-            unlist(sapply(cause, strheight, units="user")))
-
-  # draw effect
-  arrows(0, 50, usr[2]-we-1, 50, code=2, length=0.1, angle=20)
-  text(usr[2]-we,50, effect, adj=c(0,0.5), cex=cex[3], font=font[3])
-
-  # draw branches and cause labels
-  a <- (usr[2]-we)/(max(ncup,nclo)+1)
-  ac <-  a*(0:(max(ncup,nclo)))
-  for (i in 1:(length(ac)-1))
-      { segments(mean2(ac)[i], 95, ac[i+1], 50) 
-        text(mean2(ac)[i], 96, names(cause)[i], 
-             pos=3, offset=0.5, cex=cex[1], font=font[1]) 
-        if (i <= nclo)
-           { segments(mean2(ac)[i], 5, ac[i+1], 50)
-             text(mean2(ac)[i], 4, names(cause)[[ncup+i]], 
-                  pos=1, offset=0.5, cex=cex[1], font=font[1]) }
-      }
-
-  # draw labels for upper branches
-  for (j in 1:ncup)
-      { b <- (50-95)/(ac[j+1]-mean2(ac)[j])
-        a <- 95-b*mean2(ac)[j]
-        y <- rev(50+cumsum((95-50)/(ncc+1))*(1:(ncc)))
-        x <- (y-a)/b
-        for (i in 1:length(y))
-            { label <- cause[[j]][i]
-              if (!is.na(label))
-                 text(x[i], y[i], label, pos=4, 
-                      offset=0.2, cex=cex[2], font=font[2]) 
-             }
-      }       
-  # draw labels for lower branches
-  for (j in 1:ncup)
-      { b <- (50-5)/(ac[j+1]-mean2(ac)[j])
-        a <- 5-b*mean2(ac)[j]
-        y <- cumsum((95-50)/(ncc+1))*(1:(ncc))
-        x <- (y-a)/b
-        if (j <= nclo)
-           for (i in 1:length(y))
-               { label <- cause[[ncup+j]][i]
-                 if (!is.na(label))
-                    text(x[i], y[i], label, pos=4, 
-                         offset=0.2, cex=cex[2], font=font[2])
-               }
-      }
-
-  invisible()
-}
-
-"qcc.groups" <- function(data, sample)
+qcc.groups <- function(data, sample)
 {
   if(length(data)!=length(sample))
     stop("data and sample must be vectors of equal length")
@@ -1832,7 +1035,7 @@
   return(x)
 }
 
-"qcc.overdispersion.test" <- function(x, size, 
+qcc.overdispersion.test <- function(x, size, 
                             type=ifelse(missing(size), "poisson", "binomial"))
 {
   type <- match.arg(type, c("poisson", "binomial"))
@@ -1862,40 +1065,4 @@
   return(out)
 }
 
-#
-# Options retrieval and setting
-#
-".qcc.options" <- list(exp.R.unscaled = c(NA, 1.128, 1.693, 2.059, 2.326, 2.534, 2.704, 2.847, 2.970, 3.078, 3.173, 3.258, 3.336, 3.407, 3.472, 3.532, 3.588, 3.640, 3.689, 3.735, 3.778, 3.819, 3.858, 3.895, 3.931),
-                       se.R.unscaled = c(NA, 0.8525033, 0.8883697, 0.8798108, 0.8640855, 0.8480442, 0.8332108, 0.8198378, 0.8078413, 0.7970584, 0.7873230, 0.7784873, 0.7704257, 0.7630330, 0.7562217, 0.7499188, 0.7440627, 0.7386021, 0.7334929, 0.7286980, 0.7241851, 0.7199267, 0.7158987, 0.7120802, 0.7084528, 0.7050004, 0.7017086, 0.6985648, 0.6955576, 0.6926770, 0.6899137, 0.6872596, 0.6847074, 0.6822502, 0.6798821, 0.6775973, 0.6753910, 0.6732584, 0.6711952, 0.6691976, 0.6672619, 0.6653848, 0.6635632, 0.6617943, 0.6600754, 0.6584041, 0.6567780, 0.6551950, 0.6536532, 0.6521506),
-                      beyond.limits = list(pch=19, col="red"),
-                      violating.runs = list(pch=19, col="orange"),
-                      run.length = 7,
-                      # bg.margin = "lightgrey",
-                      bg.margin = rgb(229,229,229,max=255),
-                      bg.figure = "white",
-                      cex = 1,
-                      font.stats = 1,
-                      cex.stats = 1)
 
-"qcc.options" <- function (...)
-{
-  if(nargs() == 0) return(.qcc.options)
-  current <- .qcc.options
-  temp <- list(...)
-  if(length(temp) == 1 && is.null(names(temp))) 
-    { arg <- temp[[1]]
-      switch(mode(arg),
-             list = temp <- arg,
-             character = return(.qcc.options[[arg]]),
-             stop(paste("invalid argument:", arg))) }
-  if(length(temp) == 0) return(current)
-  name <- names(temp)
-  if(is.null(name)) stop("options must be given by name")
-  changed <- current[name]
-  current[name] <- temp
-  if(sys.parent() == 0) 
-       env <- pos.to.env( match("package:qcc", search()) )
-  else env <- parent.frame()
-  assign(".qcc.options", current, envir = env)
-  invisible(current)
-}

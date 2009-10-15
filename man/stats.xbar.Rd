@@ -3,7 +3,7 @@
 \alias{sd.xbar}
 \alias{limits.xbar}
 
-\title{Functions to plot Shewhart xbar chart}
+\title{Statistics used in computing and drawing a Shewhart xbar chart}
 \description{These functions are used to compute statistics required by the xbar chart.}
 \usage{
 stats.xbar(data, sizes)
@@ -12,7 +12,7 @@ limits.xbar(center, std.dev, sizes, conf)
 }
 \arguments{
   \item{data}{the observed data values}
-  \item{center}{sample/group center statistic.}
+  \item{center}{sample/group center statistic}
   \item{sizes}{samples sizes. Optional}
   \item{std.dev}{within group standard deviation. Optional for \code{sd.xbar} function, required for \code{limits.xbar}. See details.}
   \item{conf}{a numeric value used to compute control limits, specifying the number of standard deviations (if \code{conf} > 1) or the confidence level (if 0 < \code{conf} < 1).}

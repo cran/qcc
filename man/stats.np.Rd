@@ -3,7 +3,7 @@
 \alias{sd.np}
 \alias{limits.np}
 
-\title{Functions to plot Shewhart np chart}
+\title{Statistics used in computing and drawing a Shewhart np chart}
 \description{These functions are used to compute statistics required by the np chart.}
 \usage{
 stats.np(data, sizes)

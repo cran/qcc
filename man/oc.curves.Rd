@@ -4,7 +4,7 @@
 \alias{oc.curves.p}
 \alias{oc.curves.c}
 \title{Operating Characteristic Function}
-\description{Draws the operating characteristic curves for a `qcc' object.}
+\description{Draws the operating characteristic curves for a 'qcc' object.}
 \usage{
 oc.curves(object, \dots)
 
@@ -17,7 +17,7 @@ oc.curves.c(object, nsigmas = object$nsigmas, identify = FALSE, restore.par=TRUE
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-\item{object}{an object of class `qcc'.}
+\item{object}{an object of class 'qcc'.}
 \item{identify}{logical specifying whether to interactively identify points on the plot (see help for \code{\link{identify}}).}
 \item{n}{a vector of values specifying the sample sizes for which to draw the OC curves.}
 \item{c}{a vector of values specifying the multipliers for sigma in case of continuous variable.}
@@ -25,7 +25,7 @@ oc.curves.c(object, nsigmas = object$nsigmas, identify = FALSE, restore.par=TRUE
 \item{restore.par}{a logical value indicating whether the previous \code{par} settings must be restored. If you need to add points, lines, etc. to a chart set this to \code{FALSE}.}
 \item{\dots}{}
 }
-\details{An operating characteristic curve graphically provides information about the probability of not detecting a shift in the process. \code{oc.curves} is a generic function which calls the proper function depending on the type of `qcc' object. Further arguments provided through \dots are passed to the specific function depending on the type of chart.}
+\details{An operating characteristic curve graphically provides information about the probability of not detecting a shift in the process. \code{oc.curves} is a generic function which calls the proper function depending on the type of 'qcc' object. Further arguments provided through \dots are passed to the specific function depending on the type of chart.}
 \value{The function invisibly returns a matrix or a vector of beta values, the probability of type II error.}
 \references{
 Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. \cr

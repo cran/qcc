@@ -2,7 +2,7 @@
 \alias{qcc.groups}
 
 \title{Grouping data based on a sample indicator}
-\description{This function allows to easily group data to use as input to the `qcc' function.}
+\description{This function allows to easily group data to use as input to the 'qcc' function.}
 \usage{
 qcc.groups(data, sample)
 }
@@ -26,5 +26,5 @@ qcc.groups(diameter, sample)
 # some obs are removed, the result is still a 40x5 matrix but with NAs added
 qcc.groups(diameter[-c(1,2,50,52, 199)], sample[-c(1,2,50,52, 199)])
 }
-\keyword{}
+\keyword{manip}
 

@@ -3,7 +3,7 @@
 \alias{sd.p}
 \alias{limits.p}
 
-\title{Functions to plot Shewhart p chart}
+\title{Statistics used in computing and drawing a Shewhart p chart}
 \description{These functions are used to compute statistics required by the p chart.}
 \usage{
 stats.p(data, sizes)

@@ -1,18 +1,18 @@
 \name{process.capability}
 \alias{process.capability}
 \title{Process capability analysis}
-\description{Computes process capability indices for a `qcc' object of type \code{"xbar"} and plot the histogram.}
+\description{Computes process capability indices for a 'qcc' object of type \code{"xbar"} and plot the histogram.}
 \usage{
 process.capability(object,spec.limits, target, std.dev, nsigmas, 
                    confidence.level = 0.95, breaks = "scott", 
                    add.stats = TRUE, print = TRUE, restore.par = TRUE)
 }
 \arguments{
-\item{object}{a `qcc' object of type \code{"xbar"}}
+\item{object}{a 'qcc' object of type \code{"xbar"}}
 \item{spec.limits}{a vector specifying the lower and upper specification limits.}
-\item{target}{a value specifying the target of the process. If missing the value from the `qcc' object is used if not \code{NULL}, otherwise the target is set at the middle value bewteen specification limits.}
-\item{std.dev}{a value specifying the within-group standard deviation. If not provided is taken from the `qcc' object.}
-\item{nsigmas}{a numeric value specifying the number of sigmas to use. If not provided is taken from the `qcc' object.}
+\item{target}{a value specifying the target of the process. If missing the value from the 'qcc' object is used if not \code{NULL}, otherwise the target is set at the middle value bewteen specification limits.}
+\item{std.dev}{a value specifying the within-group standard deviation. If not provided is taken from the 'qcc' object.}
+\item{nsigmas}{a numeric value specifying the number of sigmas to use. If not provided is taken from the 'qcc' object.}
 \item{confidence.level}{a numeric value between 0 and 1 specifying the level to use for computing confidence intervals.}
 \item{breaks}{a value or string used to draw the histogram. See the help for  \code{\link{hist}} for more details. }
 \item{add.stats}{a logical value indicating whether statistics and capability indices should be added at the bottom of the chart.}

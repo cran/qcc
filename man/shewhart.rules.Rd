@@ -11,7 +11,7 @@ beyond.limits(object, limits = object$limits)
 violating.runs(object, run.length = qcc.options("run.length"))
 }
 \arguments{
-  \item{object}{an object of class `qcc'.}
+  \item{object}{an object of class 'qcc'.}
   \item{limits}{control limits}
   \item{run.length}{the maximum value of a run before to signal a
   point as out of control.}

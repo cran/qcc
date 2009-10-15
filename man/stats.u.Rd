@@ -3,7 +3,7 @@
 \alias{sd.u}
 \alias{limits.u}
 
-\title{Functions to plot Shewhart u chart}
+\title{Statistics used in computing and drawing a Shewhart u chart}
 \description{These functions are used to compute statistics required by the u chart.}
 \usage{
 stats.u(data, sizes)

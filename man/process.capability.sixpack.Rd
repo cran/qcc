@@ -6,11 +6,11 @@
 process.capability.sixpack(object, spec.limits, target, nsigmas, std.dev)
 }
 \arguments{
-\item{object}{a `qcc' object of type \code{"xbar"}}
+\item{object}{a 'qcc' object of type \code{"xbar"}}
 \item{spec.limits}{a vector specifying the lower and upper specification limits.}
-\item{target}{a value specifying the target of the process. If missing the value from the `qcc' object is used if not \code{NULL}, otherwise the target is set at the middle value bewteen specification limits.}
-\item{nsigmas}{a numeric value specifying th number of sigmas to use. If not provided is taken from the `qcc' object.}
-\item{std.dev}{a value specifying the within-group standard deviation. If not provided is taken from the `qcc' object.}
+\item{target}{a value specifying the target of the process. If missing the value from the 'qcc' object is used if not \code{NULL}, otherwise the target is set at the middle value bewteen specification limits.}
+\item{nsigmas}{a numeric value specifying th number of sigmas to use. If not provided is taken from the 'qcc' object.}
+\item{std.dev}{a value specifying the within-group standard deviation. If not provided is taken from the 'qcc' object.}
 }
 \details{The process capability sixpack plots are: \cr
 a xbar chart \cr

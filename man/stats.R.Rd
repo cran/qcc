@@ -3,7 +3,7 @@
 \alias{sd.R}
 \alias{limits.R}
 
-\title{Functions to plot Shewhart R chart}
+\title{Statistics used in computing and drawing a Shewhart R chart}
 \description{These functions are used to compute statistics required by the R chart.}
 \usage{
 stats.R(data, sizes)

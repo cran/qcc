@@ -1,11 +1,10 @@
 \name{qcc.options}
 \alias{qcc.options}
-\alias{.qcc.options}
 
-\title{Set or return options for the `qcc' package.}
+\title{Set or return options for the 'qcc' package.}
 
 \description{This function can be used to control the behavior of the
-`qcc' library such as the background color, out-of-control points appearance,
+'qcc' library such as the background color, out-of-control points appearance,
  and many others.}
 \usage{qcc.options(\dots)}
 \arguments{
@@ -54,10 +53,14 @@ In this case the list \code{.qcc.options} is modified and any modification will 
 %\note{}
 \seealso{\code{\link{qcc}} }
 \examples{
-qcc.options()
-qcc.options("cex")
-qcc.options("cex"=2)
-qcc.options(bg.margin="yellow")
+old <- qcc.options()			# save defaults
+qcc.options("cex.stats")		# get a single parameter
+qcc.options("cex.stats"=1.2)	# change parameters
+qcc.options(bg.margin="azure2")
+qcc.options("violating.runs" = list(pch = 15, col = "purple"))
+qcc.options("beyond.limits" = list(pch = 15, col = "orangered"))
+qcc(rnorm(100), type = "xbar.one", std.dev = 0.7)	# see the results
+qcc.options(old)				# restore old defaults 
 }
 \keyword{htest}
 \keyword{hplot}

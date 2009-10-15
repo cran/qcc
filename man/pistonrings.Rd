@@ -3,7 +3,7 @@
 \docType{data}
 \title{Piston rings data}
 \description{
-Piston rings for an automotive engine are produced by a forging process. The inside diameter of the rings manufactured by the process is measured on 25 samples, each of size 5, drawn from a process being considered `in control'.
+Piston rings for an automotive engine are produced by a forging process. The inside diameter of the rings manufactured by the process is measured on 25 samples, each of size 5, drawn from a process being considered 'in control'.
 }
 \usage{data(pistonrings)}
 \format{

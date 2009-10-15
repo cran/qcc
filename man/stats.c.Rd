@@ -4,7 +4,7 @@
 \alias{limits.c}
 
 \title{Functions to plot Shewhart c chart}
-\description{These functions are used to compute statistics required by the c chart.}
+\description{Statistics used in computing and drawing a Shewhart c chart.}
 \usage{
 stats.c(data, sizes)
 sd.c(data, sizes, ...)

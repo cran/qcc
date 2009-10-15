@@ -1,3 +1,24 @@
+\name{qcc-package}
+\alias{qcc-package}
+\docType{package}
+\title{Quality Control Charts}
+\description{
+Shewhart quality control charts for continuous, attribute and
+count data. Cusum and EWMA charts. Operating characteristic
+curves.  Process capability analysis. Pareto chart and
+cause-and-effect chart. Multivariate control charts.
+}
+\details{
+\tabular{ll}{
+Package: \tab qcc\cr
+Version: \tab 2.0\cr
+Date: \tab 2009/10/15\cr
+Depends: \tab R (>= 2.9)\cr
+License: \tab GPL version 2 (or newer)
+}
+
+Index:
+\preformatted{
 boiler                  Bolier temperature data
 cause.and.effect        Cause and effect diagram
 circuit                 Circuit boards data
@@ -17,7 +38,6 @@ process.capability      Process capability analysis
 process.capability.sixpack
                         Process capability sixpack plots
 qcc                     Quality Control Charts
-qcc-package             Quality Control Charts
 qcc.groups              Grouping data based on a sample indicator
 qcc.options             Set or return options for the 'qcc' package.
 qcc.overdispersion.test
@@ -45,3 +65,13 @@ stats.xbar              Statistics used in computing and drawing a
                         Shewhart xbar chart
 stats.xbar.one          Statistics used in computing and drawing a
                         Shewhart xbar chart for one-at-time data
+}
+}
+\author{Luca Scrucca \email{luca@stat.unipg.it}}
+\references{
+Mason, R.L. and Young, J.C. (2002) \emph{Multivariate Statistical Process Control with Industrial Applications}, SIAM. \cr
+Montgomery, D.C. (2005) \emph{Introduction to Statistical Quality Control}, 5th ed. New York: John Wiley & Sons. \cr
+Ryan, T. P. (2000), \emph{Statistical Methods for Quality Improvement}, 2nd ed. New York: John Wiley & Sons, Inc. \cr
+Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
+}
+\keyword{ package }

@@ -4,26 +4,27 @@
 \alias{summary.qcc}
 \alias{plot.qcc}
 \title{Quality Control Charts}
-\description{Create an object of class `qcc' to perform statistical quality control. This object may then be used to plot Shewhart charts, Cusum and EWMA plotting, drawing OC curves, computes capability indices, and more.}
+\description{Create an object of class 'qcc' to perform statistical quality control. This object may then be used to plot Shewhart charts, drawing OC curves, computes capability indices, and more.}
 \usage{
-qcc(data, type, sizes, center, std.dev, limits, target, 
+qcc(data, type, sizes, center, std.dev, limits, 
     data.name, labels, newdata, newsizes, newlabels, 
     nsigmas = 3, confidence.level, rules = shewhart.rules, 
     plot = TRUE, \dots)
 
 \method{print}{qcc}(x, \dots)
 
-\method{summary}{qcc}(object, \dots)
+\method{summary}{qcc}(object, digits = getOption("digits"), \dots)
 
 \method{plot}{qcc}(x, add.stats = TRUE, chart.all = TRUE, 
      label.limits = c("LCL ", "UCL"), title, xlab, ylab, ylim, 
-     axes.las = 0, restore.par = TRUE, \dots)
+     axes.las = 0, digits = getOption("digits"),
+     restore.par = TRUE, \dots)
 }
 \arguments{
 
   \item{data}{a data frame, a matrix or a vector containing observed data for
   the variable to chart. Each row of a data frame or a matrix, and each
-  value of a vector, refers to a sample or ``rationale group''.}
+  value of a vector, refers to a sample or ''rationale group''.}
 
   \item{type}{a character string specifying the group statistics to compute:
 
@@ -43,15 +44,13 @@ qcc(data, type, sizes, center, std.dev, limits, target,
 
 \item{sizes}{a value or a vector of values specifying the sample sizes associated with each group. For continuous data provided as data frame or matrix the sample sizes are obtained counting the non-\code{NA} elements of each row. For \code{"p"}, \code{"np"} and \code{"u"} charts the argument \code{sizes} is required.}
 
-\item{center}{a value specifying the center of group statistics.}
+\item{center}{a value specifying the center of group statistics or the ''target'' value of the process.}
 
 \item{std.dev}{a value or an available method specifying the within-group standard deviation(s) of the process. \cr
-Several methods are available for estimating the standard deviation in case of \code{"xbar"}, \code{"R"}, and \code{"S"} charts (see \code{\link{sd.xbar}}).
+Several methods are available for estimating the standard deviation in case of a continuous process variable; see \code{\link{sd.xbar}}, \code{\link{sd.xbar.one}}, \code{\link{sd.R}}, \code{\link{sd.S}}.
 }
 
 \item{limits}{a two-values vector specifying control limits.}
-
-\item{target}{a value specifying the ``target'' value of the process.}
 
 \item{data.name}{a string specifying the name of the variable which appears on the plots. If not provided is taken from the object given as data.}
 
@@ -63,7 +62,7 @@ Several methods are available for estimating the standard deviation in case of \
 
 \item{newlabels}{a character vector of labels for each new group defined in the argument \code{newdata}.}
 
-\item{nsigmas}{a numeric value specifying th number of sigmas to use for computing control limits. It is ignored when the \code{confidence.level} argument is  provided.} 
+\item{nsigmas}{a numeric value specifying the number of sigmas to use for computing control limits. It is ignored when the \code{confidence.level} argument is  provided.} 
 
 \item{confidence.level}{a numeric value between 0 and 1 specifying the confidence level of the computed probability limits.} 
 
@@ -87,16 +86,18 @@ Several methods are available for estimating the standard deviation in case of \
 
 \item{axes.las}{numeric in \{0,1,2,3\} specifying the style of axis labels. See \code{help(par)}.}
 
+\item{digits}{the number of significant digits to use.}
+
 \item{restore.par}{a logical value indicating whether the previous \code{par} settings must be restored. If you need to add points, lines, etc. to a control chart set this to \code{FALSE}.}
 
-\item{object}{an object of class `qcc'.}
+\item{object}{an object of class 'qcc'.}
 
-\item{x}{an object of class `qcc'.}
+\item{x}{an object of class 'qcc'.}
 
-\item{\dots}{additional arguments to be passed to the plotting function.} 
+\item{\dots}{additional arguments to be passed to the generic function.} 
 }
 %\details{}
-\value{Returns an object of class `qcc'}
+\value{Returns an object of class 'qcc'.}
 \references{
 Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. \cr
 Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
@@ -105,6 +106,9 @@ Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New Y
 %\note{ ~~further notes~~ }
 \seealso{\code{\link{shewhart.rules}}, \code{\link{cusum}}, \code{\link{ewma}}, \code{\link{oc.curves}}, \code{\link{process.capability}}, \code{\link{qcc.groups}} }
 \examples{
+##
+##  Continuous data 
+##
 data(pistonrings)
 attach(pistonrings)
 diameter <- qcc.groups(diameter, sample)
@@ -162,7 +166,7 @@ oldpar <- par(no.readonly = TRUE)
 par(mfrow=c(1,2), mar=c(5,5,3,0))
 plot(q1, title="First samples", ylim=c(0,0.5), add.stats=FALSE, restore.par=FALSE)
 par("mar"=c(5,0,3,3), yaxt="n")
-plot(q2, title="Second sample", add.stats=FALSE, ylim=c(0,0.5))
+plot(q2, title="Second samples", add.stats=FALSE, ylim=c(0,0.5))
 par(oldpar)
 
 data(circuit)
@@ -193,10 +197,15 @@ abline(h=0, lty=2)
 abline(h=c(-3,3), lty=2)
 detach(dyedcloth)
 
+##
+##  Continuous one-at-time data 
+##
+
 # viscosity data (Montgomery, pag. 242)
 x <- c(33.75, 33.05, 34, 33.81, 33.46, 34.02, 33.68, 33.27, 33.49, 33.20,
        33.62, 33.00, 33.54, 33.12, 33.84)
 qcc(x, type="xbar.one")
+qcc(x, type="xbar.one", std.dev = "SD")
 }
 \keyword{htest}
 \keyword{hplot}
