@@ -281,7 +281,8 @@ plot.mqcc <- function(x, add.stats = TRUE, chart.all = TRUE,
   if(length(violations$beyond.limits))
     { v <- violations$beyond.limits
       if(!chart.all & !is.null(newstats))
-        { v <- v - length(stats) }
+        { v <- v - length(stats) 
+          v <- v[v>0] }
       points(indices[v], statistics[v], 
              col = qcc.options("beyond.limits")$col, 
              pch = qcc.options("beyond.limits")$pch) 
@@ -509,7 +510,7 @@ limits.T2.single <- function(ngroups, size = 1, nvars, conf)
   n   <- size        # samples size
   p   <- nvars       # num. of variables
   # Phase 1 control limits
-  # Tracy Young Mason (1992)
+  # Tracy Mason Young (1992)
   ucl <- (m-1)^2/m*qbeta(conf, p/2, (m-p-1)/2)
   lcl <- 0
   ctrl.limits <- matrix(c(lcl, ucl), ncol = 2)

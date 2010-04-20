@@ -300,7 +300,8 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
   if(length(violations$violating.runs))
     { v <- violations$violating.runs
       if(!chart.all & !is.null(newstats))
-        { v <- v - length(stats) }
+        { v <- v - length(stats) 
+          v <- v[v>0] }
       points(indices[v], statistics[v], 
              col = qcc.options("violating.runs")$col, 
              pch = qcc.options("violating.runs")$pch) 
@@ -311,7 +312,8 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
   if(length(violations$beyond.limits))
     { v <- violations$beyond.limits
       if(!chart.all & !is.null(newstats))
-        { v <- v - length(stats) }
+        { v <- v - length(stats) 
+          v <- v[v>0] }
       points(indices[v], statistics[v], 
              col = qcc.options("beyond.limits")$col, 
              pch = qcc.options("beyond.limits")$pch) 

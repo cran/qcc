@@ -10,7 +10,7 @@ ewmaSmooth(x, y, lambda = 0.2, start, \dots)
 \item{y}{a vector of y-values.}
 \item{lambda}{the smoothing parameter.}
 \item{start}{the starting value.}
-\item{\dots}{}
+\item{\dots}{additional arguments (currently not used).}
 }
 \details{
 EWMA function smooths a series of data based on a moving average with weights which decay exponentially.
