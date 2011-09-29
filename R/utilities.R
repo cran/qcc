@@ -68,8 +68,8 @@ qcc.options <- function (...)
   version <- grep("Version:", description, ignore.case = TRUE, value = TRUE)
   version <- gsub(pattern = "Version:", replacement = "", version, ignore.case = TRUE)
   version <- gsub(pattern = " ", replacement = "", version)
-  cat("Package 'qcc', version", version, "\n")
-  cat("Type 'citation(\"qcc\")' for citing this R package in publications.\n")
+  packageStartupMessage("Package 'qcc', version ", version)
+  packageStartupMessage("Type 'citation(\"qcc\")' for citing this R package in publications.")
   invisible()
 }
 

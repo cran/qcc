@@ -137,7 +137,7 @@ q2 = qcc(X2, type = "xbar", confidence.level = q$confidence.level^(1/2))
 summary(q2)
 
 
-library(MASS)
+require(MASS)
 # generate new "in control" data
 Xnew = list(X1 = matrix(NA, 10, 4), X2 =  matrix(NA, 10, 4))
 for(i in 1:4)

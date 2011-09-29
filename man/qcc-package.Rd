@@ -35,8 +35,6 @@ pareto.chart            Pareto chart
 pcmanufact              Personal computer manufacturer data
 pistonrings             Piston rings data
 process.capability      Process capability analysis
-process.capability.sixpack
-                        Process capability sixpack plots
 qcc                     Quality Control Charts
 qcc.groups              Grouping data based on a sample indicator
 qcc.options             Set or return options for the 'qcc' package.

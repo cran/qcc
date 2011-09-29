@@ -42,7 +42,7 @@ Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th 
 Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
 \author{Luca Scrucca \email{luca@stat.unipg.it}}
-\seealso{\code{\link{process.capability.sixpack}}, \code{\link{qcc}}}
+\seealso{\code{\link{qcc}}}
 \examples{
 data(pistonrings)
 attach(pistonrings)

@@ -3,18 +3,21 @@
 \title{Pareto chart}
 \description{Plot a Pareto chart.}
 \usage{
-pareto.chart(x, ylab = "Frequency", xlab, ylim, main, 
+pareto.chart(x, ylab = "Frequency", ylab2 = "Cumulative Percentage", xlab, 
+             cumperc = seq(0, 100, by = 25), ylim, main, 
              col = heat.colors(length(x)), \dots)
 }
 \arguments{
 \item{x}{a vector of values. \code{names(x)} are used for labelling the bars.}
 \item{ylab}{a string specifying the label for the y-axis.}
+\item{ylab2}{a string specifying the label for the second y-axis on the right side.}
 \item{xlab}{a string specifying the label for the x-axis.}
+\item{cumperc}{a vector of percentage values to be used as tickmarks for the second y-axis on the right side.}
 \item{ylim}{a numeric vector specifying the limits for the y-axis.}
 \item{main}{a string specifying the main title to appear on the plot.}   \item{col}{a value for the color, a vector of colors, or a palette for the bars. See the help for \code{colors} and \code{palette}.}
 \item{\dots}{other graphical arguments to be passed to the \code{barplot} function.}
 }
-\value{Returns a matrix containing the descriptive statistics used to draw the Pareto chart.}
+\value{Returns a table containing the descriptive statistics used to draw the Pareto chart.}
 \details{A Pareto chart is a barplot where the categories are ordered in non increasing order, and a line is also added to show the cumulative sum.}
 %\value{}
 \references{
@@ -28,5 +31,6 @@ names(defect) <- c("price code", "schedule date", "supplier code", "contact num.
 pareto.chart(defect, ylab = "Error frequency")
 pareto.chart(defect, ylab = "Error frequency", xlab = "Error causes", las=1)
 pareto.chart(defect, ylab = "Error frequency", col=rainbow(length(defect)))
+pareto.chart(defect, cumperc = seq(0, 100, by = 5), ylab2 = "A finer tickmarks grid")
 }
 \keyword{hplot}
