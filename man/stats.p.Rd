@@ -27,7 +27,7 @@ The function \code{sd.p} returns \code{std.dev} the standard deviation of the st
 The function \code{limits.p} returns a matrix with lower and upper control limits. 
 }
 \references{
-Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. \cr
+Montgomery, D.C. (2005) \emph{Introduction to Statistical Quality Control}, 5th ed. New York: John Wiley & Sons. \cr
 Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
 \author{Luca Scrucca \email{luca@stat.unipg.it}}

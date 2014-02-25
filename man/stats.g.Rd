@@ -39,7 +39,8 @@ limits.g(center, std.dev, sizes, conf)
   the number of non-events between events.
 }
 
-\references{ Kaminsky, FC et. al. (1992) \emph{Statistical Control Charts Based on a Geometric Distribution}, Journal of Quality Technology, 24, pp 63--69. \cr
+\references{
+Kaminsky, FC et. al. (1992) \emph{Statistical Control Charts Based on a Geometric Distribution}, Journal of Quality Technology, 24, pp 63--69. \cr
 Yang, Z et. al. (2002) On the Performance of Geometric Charts with
 Estimated Control Limits, \emph{Journal of Quality Technology}, 34, pp 448--458.
 }

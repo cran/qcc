@@ -1,6 +1,7 @@
 citHeader("To cite qcc in publications use:")
 
-citEntry(entry       = "article",
+citEntry(
+    entry        = "article",
 	title        = "qcc: an R package for quality control charting and statistical process control",
 	author       = personList(person(given="Luca", family="Scrucca", email="luca@stat.unipg.it")),
 	journal      = "R News",
@@ -8,8 +9,9 @@ citEntry(entry       = "article",
 	pages        = "11--17",
     volume       = "4/1",
 	url          = "http://CRAN.R-project.org/doc/Rnews/",
-	textVersion  = paste("Scrucca, L. (2004).",
-		"qcc: an R package for quality control charting and statistical process control.",
-		"R News 4/1, 11-17.")
-	)
+    
+	textVersion  = 
+    paste("Scrucca, L. (2004).",
+	      "qcc: an R package for quality control charting and statistical process control.", "R News 4/1, 11-17.")
+)
 

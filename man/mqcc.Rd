@@ -94,7 +94,9 @@ By default is set at \eqn{(1 - 0.0027)^p} where \eqn{p} is the number of variabl
 \references{
 Mason, R.L. and Young, J.C. (2002) \emph{Multivariate Statistical Process Control with Industrial Applications}, SIAM. \cr
 Montgomery, D.C. (2005) \emph{Introduction to Statistical Quality Control}, 5th ed. New York: John Wiley & Sons. \cr
-Ryan, T. P. (2000), \emph{Statistical Methods for Quality Improvement}, 2nd ed. New York: John Wiley & Sons, Inc.
+Ryan, T. P. (2000), \emph{Statistical Methods for Quality Improvement}, 2nd ed. New York: John Wiley & Sons, Inc. \cr
+Scrucca, L. (2004). qcc: an R package for quality control charting and statistical process control. \emph{R News} 4/1, 11-17.
+Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
 \author{Luca Scrucca \email{luca@stat.unipg.it}}
 %\note{}
@@ -169,12 +171,14 @@ summary(q)
 
 # generate new "in control" data
 boilerNew = mvrnorm(10, mu = q$center, Sigma = q$cov)
-qq = mqcc(boiler, type = "T2.single", confidence.level = 0.999, newdata = boilerNew, pred.limits = TRUE)
+qq = mqcc(boiler, type = "T2.single", confidence.level = 0.999, 
+          newdata = boilerNew, pred.limits = TRUE)
 summary(qq)
 
 # generate new "out of control" data
 boilerNew = mvrnorm(10, mu = 1.01*q$center, Sigma = q$cov)
-qq = mqcc(boiler, type = "T2.single", confidence.level = 0.999, newdata = boilerNew, pred.limits = TRUE)
+qq = mqcc(boiler, type = "T2.single", confidence.level = 0.999, 
+          newdata = boilerNew, pred.limits = TRUE)
 summary(qq)
 
 # provides "robust" estimates of means and covariance matrix

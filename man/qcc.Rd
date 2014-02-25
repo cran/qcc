@@ -99,12 +99,18 @@ Several methods are available for estimating the standard deviation in case of a
 %\details{}
 \value{Returns an object of class 'qcc'.}
 \references{
-Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. \cr
+Mason, R.L. and Young, J.C. (2002) \emph{Multivariate Statistical Process Control with Industrial Applications}, SIAM. \cr
+Montgomery, D.C. (2005) \emph{Introduction to Statistical Quality Control}, 5th ed. New York: John Wiley & Sons. \cr
+Ryan, T. P. (2000), \emph{Statistical Methods for Quality Improvement}, 2nd ed. New York: John Wiley & Sons, Inc. \cr
+Scrucca, L. (2004). qcc: an R package for quality control charting and statistical process control. \emph{R News} 4/1, 11-17.
 Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
+
 \author{Luca Scrucca \email{luca@stat.unipg.it}}
 %\note{ ~~further notes~~ }
+
 \seealso{\code{\link{shewhart.rules}}, \code{\link{cusum}}, \code{\link{ewma}}, \code{\link{oc.curves}}, \code{\link{process.capability}}, \code{\link{qcc.groups}} }
+
 \examples{
 ##
 ##  Continuous data 

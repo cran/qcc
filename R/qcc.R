@@ -255,13 +255,12 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
      }
   else main.title <- paste(title)
 
-  oldpar <- par(bg  = qcc.options("bg.margin"), 
-                cex = qcc.options("cex"),
-                mar = if(add.stats)
-                           pmax(par("mar"), c(8.5,0,0,0))
-                      else par("mar"),
-                no.readonly = TRUE)
-  if (restore.par) on.exit(par(oldpar))
+  oldpar <- par(no.readonly = TRUE)
+  if(restore.par) on.exit(par(oldpar))
+  mar <- pmax(oldpar$mar, c(5.1,4.1,4.1,2.1))
+  par(bg  = qcc.options("bg.margin"), 
+      cex = qcc.options("cex"),
+      mar = if(add.stats) pmax(mar, c(8.5,0,0,0)) else mar)
 
   # plot Shewhart chart
   plot(indices, statistics, type="n",
@@ -486,7 +485,10 @@ stats.S <- function(data, sizes)
 {
   if (missing(sizes))
      sizes <- apply(data, 1, function(x) sum(!is.na(x)))
-  statistics <- sqrt(apply(data, 1, var, na.rm=TRUE))
+  if(ncol(data)==1) 
+    { statistics <- as.vector(data) }
+  else 
+    { statistics <- sqrt(apply(data, 1, var, na.rm=TRUE)) }
   if (length(sizes == 1))
      sizes <- rep(sizes, length(statistics))
   center <- sum(sizes * statistics)/sum(sizes)
@@ -531,7 +533,10 @@ stats.R <- function(data, sizes)
 {
   if (missing(sizes))
      sizes <- apply(data, 1, function(x) sum(!is.na(x)))
-  statistics <- apply(data, 1, function(x) diff(range(x, na.rm=TRUE)))
+  if(ncol(data)==1) 
+    { statistics <- as.vector(data) }
+  else 
+    { statistics <- apply(data, 1, function(x) diff(range(x, na.rm=TRUE))) }
   if (length(sizes == 1))
      sizes <- rep(sizes, length(statistics))
   center <- sum(sizes * statistics)/sum(sizes)
@@ -872,7 +877,7 @@ oc.curves.xbar <- function(object, n, c = seq(0, 5, length=101), nsigmas = objec
   if (missing(n))
      n <- unique(c(size, c(1,5,10,15,20)))
 
-  beta <- matrix(NA, length(n), length(c))
+  beta <- matrix(as.double(NA), length(n), length(c))
   for (i in 1:length(n))
       beta[i,] <- pnorm(nsigmas-c*sqrt(n[i])) - pnorm(-nsigmas-c*sqrt(n[i]))
   rownames(beta) <- paste("n=",n,sep="")

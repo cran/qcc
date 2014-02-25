@@ -1,0 +1,13 @@
+%-------------------------------------------------------------------%
+% This is *not* the source of the vignette. It is just a place      %
+% holder for R to recognize and list the vignettes of this package. %
+%-------------------------------------------------------------------%
+
+%\VignetteIndexEntry{qcc: An R package for quality control charting and statistical process control}
+%\VignetteKeywords{}
+%\VignettePackage{qcc}
+
+\documentclass{article}
+\begin{document}
+\section*{}	
+\end{document}

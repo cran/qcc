@@ -1,29 +1,33 @@
-Changes to version 2.1
+Version 2.3
+   o Fix a bug in pareto.chart when compute percentages based on quantiles 
+     for the right axis. Added the argument plot which if sets to FALSE
+     won't produce the chart but only return a frequency summary table.
+   o Added R-news article as vignette.
+   o Modified the qcc.option function so modifying a parameter in 
+     .qcc.options inside a function will make the modification 
+     persistent even outside the function environment.
+   o Bug fix in cusum function if a vector is provided as input with sizes > 1
+     but no std.dev.      
 
+Version 2.2
    o Removed code producing plots on process capability.
 
-Changes to version 2.0
-
+Version 2.1
    o Some modifications and bug fixes to pareto.chart function.
 
-Changes to version 1.3
-
+Version 2.0
    o Multivariate control charts (T^2, T^2 for individual observations, 
      Ellipse chart for bivariate data) have been included.
-
    o 'sd.xbar.one' now allows to estimate the standard deviation by using
      the moving range (default as in the previous versions) or the method
      suggested by Ryan (2000) using the scaled std deviation of the
      observations.
-
    o 'cusum' and 'ewma' have been rewritten to be called directly with data
      and arguments. No need to create a 'qcc' object before.
-
    o Added a NAMESPACE, exporting all functions with names not starting with
      a dot '.'. 
 
-Changes to Version 1.2
-
+Version 1.3
    o Redefined 'std.dev' argument in qcc() function. It now allows to give
      a numerical value or a sting identifying a method for estimating the 
      standard deviation of a continuous process variable. Thus, these 
@@ -31,38 +35,29 @@ Changes to Version 1.2
      see help(qcc).
      Functions involved in change are std.xbar(), std.R(), std.S(), while
      the other sd.* functions only have "..." argument added.
-
    o If xbar chart is needed and the number of observations is larger than
      25 use "RMSDF" method for computing process standard deviation.
-
    o Fixed bug in highlighting violating runs and out of control points 
      when chart.all = FALSE.
-
    o Changed background color for Control Charts.
-
    o Changed position of control limit labels in Shewhat and CusSum charts.
 
-Changes to Version 1.1
-
+Version 1.2
    o Added functions to plot Shewhart g chart (geometric distribution):
      stats.g(), sd.g(), limits.g()
-     Contributed by Greg Snow (greg.snow@ihc.com).
-     
+     Contributed by Greg Snow (greg.snow@ihc.com).     
    o Bug fix in violating.runs()
-   
    o Changes in qcc.options():
      - run.length set by default at 7 (it was 5 previously)
      - 'font.stats' and 'cex.stats' control font and character expansion
        used to draw text at the bottom of control charts
-
    o Added qcc_Rnews.pdf paper in doc directory
    
-Changes to Version 1.0
-
+Version 1.1
    o Fixed some minor bugs
-   
    o Reworked on par settings to allow multiple figures
-   
    o Corrected typos in .Rd files
    
-   
+Version 1.0 
+   o Package release on CRAN.
+  

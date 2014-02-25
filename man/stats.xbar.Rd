@@ -55,7 +55,7 @@ The function \code{limits.xbar} returns a matrix with lower and upper control li
 }
 \references{
 Burr, I.W. (1969) Control charts for measurements with varying sample sizes. \emph{Journal of Quality Technology}, 1(3), 163-167. \cr
-Montgomery, D.C. (2000) \emph{Introduction to Statistical Quality Control}, 4th ed. New York: John Wiley & Sons. \cr
+Montgomery, D.C. (2005) \emph{Introduction to Statistical Quality Control}, 5th ed. New York: John Wiley & Sons. \cr
 Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
 \author{Luca Scrucca \email{luca@stat.unipg.it}}

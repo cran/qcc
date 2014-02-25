@@ -21,9 +21,12 @@ cusum <- function(data, sizes, center, std.dev, decision.interval = 5, se.shift 
          sizes <- rep(sizes, nrow(data))
       else if(length(sizes) != nrow(data))
               stop("sizes length doesn't match with data") }
+  
   # used for computing statistics and std.dev
   type <- if(any(sizes==1)) "xbar.one" else "xbar"
-
+  if(ncol(data) == 1 & any(sizes > 1) & missing(std.dev))
+     stop("sizes larger than 1 but data appears to be single samples. In this case you must provide also the std.dev")
+  
   if(missing(labels))
     { if(is.null(rownames(data))) labels <- 1:nrow(data)
       else                        labels <- rownames(data) }
@@ -234,13 +237,13 @@ plot.cusum.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
            else main.title <- paste(type, "Chart\nfor", newdata.name) }
   else main.title <- paste(title)
 
-  oldpar <- par(bg  = qcc.options("bg.margin"), 
-                cex = qcc.options("cex"),
-                mar = if(add.stats) pmax(par("mar"), c(8.5,0,0,0))
-                      else par("mar"),
-                no.readonly = TRUE)
+  oldpar <- par(no.readonly = TRUE)
   if(restore.par) on.exit(par(oldpar))
-
+  mar <- pmax(oldpar$mar, c(5.1,4.1,4.1,2.1))
+  par(bg  = qcc.options("bg.margin"), 
+      cex = qcc.options("cex"),
+      mar = if(add.stats) pmax(mar, c(8.5,0,0,0)) else mar)
+  
   plot(indices, statistics, type="n",
        ylim = if(!missing(ylim)) ylim 
               else range(cusum.pos, cusum.neg, ldb, udb),

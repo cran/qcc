@@ -261,12 +261,12 @@ plot.ewma.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
            else main.title <- paste("EWMA Chart\nfor", newdata.name) }
   else main.title <- paste(title)
 
-  oldpar <- par(bg  = qcc.options("bg.margin"), 
-                cex = qcc.options("cex"),
-                mar = if(add.stats) pmax(par("mar"), c(8.5,0,0,0))
-                      else par("mar"),
-                no.readonly = TRUE)
+  oldpar <- par(no.readonly = TRUE)
   if(restore.par) on.exit(par(oldpar))
+  mar <- pmax(oldpar$mar, c(5.1,4.1,4.1,2.1))
+  par(bg  = qcc.options("bg.margin"), 
+      cex = qcc.options("cex"),
+      mar = if(add.stats) pmax(mar, c(8.5,0,0,0)) else mar)
 
   plot(indices, statistics, type="n",
        ylim = if(!missing(ylim)) ylim 

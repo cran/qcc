@@ -23,8 +23,8 @@
 
 qcc.options <- function (...)
 {
-  if(nargs() == 0) return(.qcc.options)
   current <- .qcc.options
+  if(nargs() == 0) return(current)
 #  if(is.character(...))
 #       temp <- eval(parse(text = paste(c("list(", ..., ")"))))
 #  else temp <- list(...)
@@ -40,10 +40,8 @@ qcc.options <- function (...)
   if(is.null(name)) stop("options must be given by name")
   changed <- current[name]
   current[name] <- temp
-  if(sys.parent() == 0)
-     # env <- pos.to.env( match("package:qcc", search()) )
-       env <- asNamespace("qcc") 
-  else env <- parent.frame()
+  env <- if(sys.parent() == 0) asNamespace("qcc") 
+         else                  parent.frame()
   assign(".qcc.options", current, envir = env)
   invisible(current)
 }
