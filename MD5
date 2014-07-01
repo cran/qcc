@@ -1,4 +1,4 @@
-04d3e51cf4831acf7e000bb8d0038184 *DESCRIPTION
+495a11fb96125520b1c7fede46302360 *DESCRIPTION
 932ebae8ecd06f90dc4a3ed8f5a6935e *NAMESPACE
 c588da1178a305d2dda5e465b4713f5c *R/capability.R
 484c2c559bb212960e28b721b72bd4ff *R/causeandeffect.R
@@ -6,10 +6,9 @@ c588da1178a305d2dda5e465b4713f5c *R/capability.R
 c596be8639febc5987534b01774da0a2 *R/ewma.R
 6e03e5210954f6f29f9a6b7ecf69f644 *R/mqcc.R
 bc96db8998434021f04871a9244383b1 *R/paretochart.R
-41a712d4c611d6c63a7bfbc994430dd4 *R/qcc.R
+1cd45ce07f212c6ffc9f507ad51ce866 *R/qcc.R
 b46419247336bebc5296dd6c264327f2 *R/spc.g.R
-c0e361d3d5fe6d7adfd200503bebbb19 *R/utilities.R
-30cafaa414213908bad41e7839958680 *build/vignette.rds
+135977d5ae6031ad04010bb04938f0c4 *R/utilities.R
 1e667adc9a1ce187b5bc4c93eb21d548 *data/boiler.txt.gz
 0457baf6dcb51313abfb3a46913563ce *data/circuit.txt.gz
 c41cd7e6e3f07419d6581d4eff81d290 *data/dyedcloth.txt.gz
@@ -17,12 +16,13 @@ c41cd7e6e3f07419d6581d4eff81d290 *data/dyedcloth.txt.gz
 1238b129161b37e61874692e05332747 *data/orangejuice2.txt.gz
 7a5ed24cd2c6194d383d7b3052816adb *data/pcmanufact.txt.gz
 cdf611b3445cd3526bbc70a6ec39175a *data/pistonrings.txt.gz
-68c6a1bfda1a80cd06ab90d59c6b57e2 *demo/00Index
-88542fd10cd2ef255c12f5a5b554e5a4 *demo/process.variation.R
+1434ae86871ebe00b415bb26f97b814a *demo/00Index
+49fc9a752bd86d24e199ed48f5f7d201 *demo/p.std.chart.R
+30a8515f3e6fe5fe0c136d0e00e9db2e *demo/process.variation.R
 8d6b40d0a8de0d2e637946ca59dc2e9d *inst/CITATION
-bc0a0df47300ad2f2b0fcc9f38a4d110 *inst/NEWS
-93a4c0d15f7362b8a88e8a669957f370 *inst/doc/qcc.Rnw
-b68d138aef2c186165b20dd993b2d553 *inst/doc/qcc.pdf
+9533ea23979774ce76935c5bf4f6e9fd *inst/NEWS
+89b938cd6e241eb7b74cf74d5ddcbe72 *inst/doc/index.html
+b44240a6cf2ee925f1df5f501e1ddba8 *inst/doc/qcc.pdf
 d0810f2f73f8dc808659e136b3d55d6e *man/boiler.Rd
 52b8df46ea88dc56f856ccd58279f919 *man/cause.and.effect.Rd
 01b5da3d6b698c653b5fdecec4a947a9 *man/circuit.Rd
@@ -37,9 +37,9 @@ e5418eae033a38c7a17c52438d84a1a2 *man/ewma.Rd
 db212f02f7682aab0e34291a6983c564 *man/orangejuice2.Rd
 166cdb398248cf43f26c5798e85af423 *man/pareto.chart.Rd
 c98e7c0431d6fa7c51c56a513eb7c1b9 *man/pcmanufact.Rd
-0221c438d2e329eddd46feafe78c92a9 *man/pistonrings.Rd
+8763727ab1e8eec528f3e36c09353fbb *man/pistonrings.Rd
 efa7ed0859b08df7ff0faadaf583b7da *man/process.capability.Rd
-8b47adeeea6fe6c38758118a06516489 *man/qcc-internal.Rd
+eaa3bac60bca07fe277a58e46ff7c0bc *man/qcc-internal.Rd
 76ae52318eb8bae81a5c3da352b6a7f2 *man/qcc-package.Rd
 b91b71f4042f0a0c4f6b021772199f0d *man/qcc.Rd
 8dd15566fccb1122f777711826a3748d *man/qcc.groups.Rd
@@ -57,4 +57,3 @@ ca601d7023d7cf3b5a8814b18668b382 *man/stats.p.Rd
 fe95635f9b7e4ba53d6cd6a096a31eed *man/stats.u.Rd
 4b8f283689ba25590d47a2d55df98312 *man/stats.xbar.Rd
 7d32e691f9af2022a097b6a847938596 *man/stats.xbar.one.Rd
-93a4c0d15f7362b8a88e8a669957f370 *vignettes/qcc.Rnw

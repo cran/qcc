@@ -18,9 +18,16 @@
 qcc <- function(data, type = c("xbar", "R", "S", "xbar.one", "p", "np", "c", "u", "g"), sizes, center, std.dev, limits, data.name, labels, newdata, newsizes, newlabels, nsigmas = 3, confidence.level, rules = shewhart.rules, plot = TRUE, ...)
 {
   call <- match.call()
+  
   if (missing(data))
      stop("'data' argument is not specified")
-  type <- match.arg(type)
+  
+  
+  if(!exists(paste("stats.", type, sep = ""), mode="function") |
+     !exists(paste("sd.", type, sep = ""), mode="function") |
+     !exists(paste("limits.", type, sep = ""), mode="function"))
+    stop(paste("invalid", type, "control chart"))
+  # type <- match.arg(type)
 
   if (missing(data.name)) 
      data.name <- deparse(substitute(data))
@@ -174,10 +181,26 @@ summary.qcc <- function(object, digits =  getOption("digits"), ...)
                digits = digits, ...)
         }
   cat("\nNumber of groups: ", length(statistics))
+  
   center <- object$center
-  cat("\nCenter of group statistics: ", format(center, digits = digits))
+  if(length(center) == 1)
+    { cat("\nCenter of group statistics: ", format(center, digits = digits)) }
+  else
+    { out <- paste(format(center, digits = digits))
+      out <- out[which(cumsum(nchar(out)+1) < getOption("width")-40)]      
+      out <- paste0(paste(out, collapse = " "), " ...")
+      cat("\nCenter of group statistics: ", out, sep = "")
+    }
+  
   sd <- object$std.dev
-  cat("\nStandard deviation: ", format(sd, digits = digits), "\n")
+  if(length(sd) == 1)
+    { cat("\nStandard deviation: ", format(sd, digits = digits), "\n") }
+  else
+    { out <- paste(format(sd, digits = digits))
+      out <- out[which(cumsum(nchar(out)+1) < getOption("width")-40)]
+      out <- paste0(paste(out, collapse = " "), " ...")
+      cat("\nStandard deviation: ", out, "\n", sep = "")
+    }
 
   newdata.name <- object$newdata.name
   newstats <- object$newstats
@@ -281,7 +304,7 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
 
   if(length(center) == 1)
        abline(h = center)
-  else lines(indices, c(center, center[length(center)]), type="s")
+  else lines(indices, center[indices], type="s")
 
   if(length(lcl) == 1) 
     { abline(h = lcl, lty = 2)
@@ -329,7 +352,8 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
     }
 
   if(add.stats) 
-    { # computes the x margins of the figure region
+    { 
+      # computes the x margins of the figure region
       plt <- par()$plt; usr <- par()$usr
       px <- diff(usr[1:2])/diff(plt[1:2])
       xfig <- c(usr[1]-px*plt[1], usr[2]+px*(1-plt[2]))
@@ -339,6 +363,7 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
             side = 1, line = 5, adj = 0, at = at.col[1],
             font = qcc.options("font.stats"),
             cex = qcc.options("cex.stats"))
+      
       center <- object$center
       if(length(center) == 1)
         { mtext(paste("Center = ", signif(center[1], digits), sep = ""),
@@ -347,34 +372,51 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
                 cex = qcc.options("cex.stats"))
         }
       else 
-        { mtext("Center is variable", 
+        { mtext("Center is variable",
                 side = 1, line = 6, adj = 0, at = at.col[1],
-                qcc.options("font.stats"),
+                font = qcc.options("font.stats"),
                 cex = qcc.options("cex.stats"))
         }
-      mtext(paste("StdDev = ", signif(std.dev, digits), sep = ""),
-            side = 1, line = 7, adj = 0, at = at.col[1],
-            font = qcc.options("font.stats"),
-            cex = qcc.options("cex.stats"))
-       if(length(unique(lcl)) == 1)
-          mtext(paste("LCL = ", signif(lcl[1], digits), sep = ""), 
+      
+      if(length(std.dev) == 1)
+        { mtext(paste("StdDev = ", signif(std.dev, digits), sep = ""),
+                side = 1, line = 7, adj = 0, at = at.col[1],
+                font = qcc.options("font.stats"),
+                cex = qcc.options("cex.stats"))
+        }      
+      else
+        { mtext("StdDev is variable",
+                side = 1, line = 7, adj = 0, at = at.col[1],
+                font = qcc.options("font.stats"),
+                cex = qcc.options("cex.stats"))
+        }
+      
+      if(length(unique(lcl)) == 1)
+        { mtext(paste("LCL = ", signif(lcl[1], digits), sep = ""), 
                 side = 1, line = 6, adj = 0, at = at.col[2],
                 font = qcc.options("font.stats"),
                 cex = qcc.options("cex.stats"))
-       else 
-          mtext("LCL is variable", 
+        }
+      else 
+        { mtext("LCL is variable", 
                 side = 1, line = 6, adj = 0, at = at.col[2],
                 font =qcc.options("font.stats"),
                 cex = qcc.options("cex.stats"))
-       if(length(unique(ucl)) == 1)
-          mtext(paste("UCL = ", signif(ucl[1], digits), sep = ""),
-                side = 1, line = 7, adj = 0, at = at.col[2],
-                font = qcc.options("font.stats"),
-                cex = qcc.options("cex.stats")) 
+        }
+      
+      if(length(unique(ucl)) == 1)
+         { mtext(paste("UCL = ", signif(ucl[1], digits), sep = ""),
+                 side = 1, line = 7, adj = 0, at = at.col[2],
+                 font = qcc.options("font.stats"),
+                 cex = qcc.options("cex.stats")) 
+         }
        else 
-          mtext("UCL is variable", side = 1, line = 7, adj = 0, at = at.col[2],
-                font =qcc.options("font.stats"),
-                cex = qcc.options("cex.stats"))
+         { mtext("UCL is variable", 
+                 side = 1, line = 7, adj = 0, at = at.col[2],
+                 font =qcc.options("font.stats"),
+                 cex = qcc.options("cex.stats"))
+         }
+      
        if(!is.null(violations))
          { mtext(paste("Number beyond limits =",
                        length(unique(violations$beyond.limits))), 

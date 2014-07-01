@@ -13,7 +13,7 @@ qcc.demo.menu <- function()
   title <- paste("#-----------------------------------------#",
                  "# Some models for process variation.      #",
                  "# Make a selection (or 0 to exit):        #",
-                 "#-----------------------------------------#\n", 
+                 "#-----------------------------------------#", 
                  sep="\n")
   choice <- 100
   while(choice != 0)

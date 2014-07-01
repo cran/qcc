@@ -7,7 +7,7 @@
 \description{Internal functions for package 'qcc'.}
 
 \usage{
-.printShortMatrix(x, head = 2, tail = 1, ...)
+.printShortMatrix(x, head = 2, tail = 1, chead = 5, ctail = 1, ...)
 }
 
 % \arguments{}

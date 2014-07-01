@@ -1,3 +1,13 @@
+Version 2.5 
+   o bug fix for plotting np-chart with variable sample size.
+   o pdf files (previously included as vignettes) moved to inst/doc with 
+     corresponding index.html.
+    
+Version 2.4
+   o Added a demo showing how to extend the package by defining a new control 
+     chart, i.e. the standardized p chart.
+   o Fix a bug in qcc() to allow a user defined control chart.
+
 Version 2.3
    o Fix a bug in pareto.chart when compute percentages based on quantiles 
      for the right axis. Added the argument plot which if sets to FALSE
