@@ -1,6 +1,6 @@
-495a11fb96125520b1c7fede46302360 *DESCRIPTION
+6290d0ac5d525d317811e9773148768a *DESCRIPTION
 932ebae8ecd06f90dc4a3ed8f5a6935e *NAMESPACE
-c588da1178a305d2dda5e465b4713f5c *R/capability.R
+87bb02d83e3050cb6980f82af02bc39c *R/capability.R
 484c2c559bb212960e28b721b72bd4ff *R/causeandeffect.R
 404675c180fdfacf182b379b50709c12 *R/cusum.R
 c596be8639febc5987534b01774da0a2 *R/ewma.R
@@ -20,7 +20,7 @@ cdf611b3445cd3526bbc70a6ec39175a *data/pistonrings.txt.gz
 49fc9a752bd86d24e199ed48f5f7d201 *demo/p.std.chart.R
 30a8515f3e6fe5fe0c136d0e00e9db2e *demo/process.variation.R
 8d6b40d0a8de0d2e637946ca59dc2e9d *inst/CITATION
-9533ea23979774ce76935c5bf4f6e9fd *inst/NEWS
+0eacf89fcc1e9e48f2141ddd6ab30024 *inst/NEWS
 89b938cd6e241eb7b74cf74d5ddcbe72 *inst/doc/index.html
 b44240a6cf2ee925f1df5f501e1ddba8 *inst/doc/qcc.pdf
 d0810f2f73f8dc808659e136b3d55d6e *man/boiler.Rd
@@ -38,10 +38,10 @@ db212f02f7682aab0e34291a6983c564 *man/orangejuice2.Rd
 166cdb398248cf43f26c5798e85af423 *man/pareto.chart.Rd
 c98e7c0431d6fa7c51c56a513eb7c1b9 *man/pcmanufact.Rd
 8763727ab1e8eec528f3e36c09353fbb *man/pistonrings.Rd
-efa7ed0859b08df7ff0faadaf583b7da *man/process.capability.Rd
+f55a2d54fdbafcf113bab4b2f6aa9bcb *man/process.capability.Rd
 eaa3bac60bca07fe277a58e46ff7c0bc *man/qcc-internal.Rd
 76ae52318eb8bae81a5c3da352b6a7f2 *man/qcc-package.Rd
-b91b71f4042f0a0c4f6b021772199f0d *man/qcc.Rd
+f66220b7ae2fdbb7b50ed21f89831dcf *man/qcc.Rd
 8dd15566fccb1122f777711826a3748d *man/qcc.groups.Rd
 6a32b554c609e4e3e7e7ba634e4db987 *man/qcc.options.Rd
 909c7edc77758c1051b4cb416e337c0a *man/qcc.overdispersion.test.Rd

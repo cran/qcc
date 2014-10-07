@@ -1,3 +1,7 @@
+Version 2.6
+   o allow one sided specification limit in process.capability. 
+   o add an example in qcc man page showing how to add warning limits.
+
 Version 2.5 
    o bug fix for plotting np-chart with variable sample size.
    o pdf files (previously included as vignettes) moved to inst/doc with 
