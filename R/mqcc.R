@@ -382,10 +382,17 @@ ellipseChart <- function(object, chart.all = TRUE, show.id = FALSE, ngrid = 50,
   #
   alpha <- 1 - confidence.level
   if(correct.multiple) alpha <- 1-sqrt(1-alpha)
-  q1 <- qcc(object$data[[1]], type="xbar", plot=FALSE,
-            confidence.level = 1-alpha)
-  q2 <- qcc(object$data[[2]], type="xbar", plot=FALSE,
-            confidence.level = 1-alpha)
+  # use xbar.one method if sample size equals 1, "xbar" will fail  
+  if(n == 1)
+    { q1 <- qcc(object$data[[1]], type="xbar.one", plot=FALSE,
+                  confidence.level = 1-alpha)
+      q2 <- qcc(object$data[[2]], type="xbar.one", plot=FALSE,
+                  confidence.level = 1-alpha) }
+  else 
+    { q1 <- qcc(object$data[[1]], type="xbar", plot=FALSE,
+                  confidence.level = 1-alpha)
+      q2 <- qcc(object$data[[2]], type="xbar", plot=FALSE,
+                  confidence.level = 1-alpha) }
   #
   if(missing(xlim))
      xlim <- range(pretty(stats[,1],1), q1$limits)
