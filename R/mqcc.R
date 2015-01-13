@@ -355,7 +355,7 @@ plot.mqcc <- function(x, add.stats = TRUE, chart.all = TRUE,
 ellipseChart <- function(object, chart.all = TRUE, show.id = FALSE, ngrid = 50,
                          confidence.level, correct.multiple = TRUE,
                          title, xlim, ylim, xlab, ylab,
-                         restore.par = TRUE) 
+                         restore.par = TRUE, ...) 
 {
   if((missing(object)) | (!inherits(object, "mqcc")))
      stop("an object of class `mqcc' is required")
@@ -382,10 +382,17 @@ ellipseChart <- function(object, chart.all = TRUE, show.id = FALSE, ngrid = 50,
   #
   alpha <- 1 - confidence.level
   if(correct.multiple) alpha <- 1-sqrt(1-alpha)
-  q1 <- qcc(object$data[[1]], type="xbar", plot=FALSE,
-            confidence.level = 1-alpha)
-  q2 <- qcc(object$data[[2]], type="xbar", plot=FALSE,
-            confidence.level = 1-alpha)
+  # use xbar.one method if sample size equals 1, "xbar" will fail  
+  if(n == 1)
+    { q1 <- qcc(object$data[[1]], type="xbar.one", plot=FALSE,
+                  confidence.level = 1-alpha)
+      q2 <- qcc(object$data[[2]], type="xbar.one", plot=FALSE,
+                  confidence.level = 1-alpha) }
+  else 
+    { q1 <- qcc(object$data[[1]], type="xbar", plot=FALSE,
+                  confidence.level = 1-alpha)
+      q2 <- qcc(object$data[[2]], type="xbar", plot=FALSE,
+                  confidence.level = 1-alpha) }
   #
   if(missing(xlim))
      xlim <- range(pretty(stats[,1],1), q1$limits)
@@ -423,7 +430,7 @@ ellipseChart <- function(object, chart.all = TRUE, show.id = FALSE, ngrid = 50,
        col = qcc.options("bg.figure"))
   if(show.id)
     { text(stats, labels = names(object$statistics), cex = 0.8) }
-  else points(stats) 
+  else points(stats, ...) 
   points(center[1], center[2], pch=3, cex=2)
   #
   contour(grid[,1], grid[,2], T2, levels = q, drawlabels = FALSE, add=TRUE)
