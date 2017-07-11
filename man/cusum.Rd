@@ -9,8 +9,9 @@
 \description{Create an object of class 'cusum.qcc' to compute a Cusum chart for statistical quality control.}
 
 \usage{
-cusum(data, sizes, center, std.dev, decision.interval = 5, se.shift = 1,
-      data.name, labels, newdata, newsizes, newlabels, plot = TRUE, \dots)
+cusum(data, sizes, center, std.dev, head.start = 0,
+      decision.interval = 5, se.shift = 1, data.name, labels,
+      newdata, newsizes, newlabels, plot = TRUE, \dots)
 
 \method{print}{cusum.qcc}(x, \dots)
 
@@ -31,6 +32,11 @@ cusum(data, sizes, center, std.dev, decision.interval = 5, se.shift = 1,
 \item{std.dev}{a value or an available method specifying the within-group standard deviation(s) of the process. \cr
 Several methods are available for estimating the standard deviation. See \code{\link{sd.xbar}} and \code{\link{sd.xbar.one}} for, respectively, the grouped data case and the individual observations case.
 }
+
+\item{head.start}{The initializing value for the above-target and
+below-target cumulative sums, measured in standard errors of the summary
+statistics. Use zero for the traditional Cusum chart, or a positive
+value less than the \code{decision.interval} for a Fast Initial Response.}
 
 \item{decision.interval}{A numeric value specifying the number of standard errors of the summary statistics at which the cumulative sum is out of control.}
 
@@ -81,10 +87,10 @@ Several methods are available for estimating the standard deviation. See \code{\
 Mason, R.L. and Young, J.C. (2002) \emph{Multivariate Statistical Process Control with Industrial Applications}, SIAM. \cr
 Montgomery, D.C. (2005) \emph{Introduction to Statistical Quality Control}, 5th ed. New York: John Wiley & Sons. \cr
 Ryan, T. P. (2000), \emph{Statistical Methods for Quality Improvement}, 2nd ed. New York: John Wiley & Sons, Inc. \cr
-Scrucca, L. (2004). qcc: an R package for quality control charting and statistical process control. \emph{R News} 4/1, 11-17.
+Scrucca, L. (2004). qcc: an R package for quality control charting and statistical process control. \emph{R News} 4/1, 11-17. \cr
 Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
-\author{Luca Scrucca \email{luca@stat.unipg.it}}
+\author{Luca Scrucca}
 %\note{ ~~further notes~~ }
 \seealso{\code{\link{qcc}}, \code{\link{ewma}}}
 \examples{
@@ -101,6 +107,8 @@ summary(q)
 q <- cusum(diameter[1:25,], newdata=diameter[26:40,])
 summary(q)
 plot(q, chart.all=FALSE)
+
+detach(pistonrings)
 }
 \keyword{htest}
 \keyword{hplot}

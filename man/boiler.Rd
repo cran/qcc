@@ -1,7 +1,7 @@
 \name{boiler}
 \alias{boiler}
 \docType{data}
-\title{Bolier temperature data}
+\title{Boiler temperature data}
 \description{
 Temperature readings from the eight configured burners on a boiler.
 }

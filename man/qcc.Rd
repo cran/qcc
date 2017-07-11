@@ -3,13 +3,16 @@
 \alias{print.qcc}
 \alias{summary.qcc}
 \alias{plot.qcc}
+
 \title{Quality Control Charts}
+
 \description{Create an object of class 'qcc' to perform statistical quality control. This object may then be used to plot Shewhart charts, drawing OC curves, computes capability indices, and more.}
+
 \usage{
-qcc(data, type, sizes, center, std.dev, limits, 
-    data.name, labels, newdata, newsizes, newlabels, 
-    nsigmas = 3, confidence.level, rules = shewhart.rules, 
-    plot = TRUE, \dots)
+qcc(data, type, sizes, center, std.dev, limits,
+    data.name, labels, newdata, newsizes, newdata.name,
+    newlabels, nsigmas = 3, confidence.level,
+    rules = shewhart.rules, plot = TRUE, \dots)
 
 \method{print}{qcc}(x, \dots)
 
@@ -26,7 +29,8 @@ qcc(data, type, sizes, center, std.dev, limits,
   the variable to chart. Each row of a data frame or a matrix, and each
   value of a vector, refers to a sample or ''rationale group''.}
 
-  \item{type}{a character string specifying the group statistics to compute:
+  \item{type}{a character string specifying the group statistics to compute. \cr
+  Available methods are:
 
 \tabular{lll}{
               \tab Statistic charted   \tab Chart description \cr
@@ -40,6 +44,8 @@ qcc(data, type, sizes, center, std.dev, limits,
 \code{"u"}    \tab count               \tab average nonconformities per unit \cr
 \code{"g"}    \tab count               \tab number of non-events between events
 }
+
+Furthermore, a user specified type of chart, say \code{"newchart"}, can be provided. This requires the definition of \code{"stats.newchart"}, \code{"sd.newchart"}, and \code{"limits.newchart"}. As an example, see \code{\link{stats.xbar}}.
 }
 
 \item{sizes}{a value or a vector of values specifying the sample sizes associated with each group. For continuous data provided as data frame or matrix the sample sizes are obtained counting the non-\code{NA} elements of each row. For \code{"p"}, \code{"np"} and \code{"u"} charts the argument \code{sizes} is required.}
@@ -59,6 +65,8 @@ Several methods are available for estimating the standard deviation in case of a
 \item{newdata}{a data frame, matrix or vector, as for the \code{data} argument, providing further data to plot but not included in the computations.}
 
 \item{newsizes}{a vector as for the \code{sizes} argument providing further data sizes to plot but not included in the computations.}
+
+\item{newdata.name}{a string specifying the name of the variable which appears on the plots. If not provided is taken from the object given as newdata.}
 
 \item{newlabels}{a character vector of labels for each new group defined in the argument \code{newdata}.}
 
@@ -97,16 +105,20 @@ Several methods are available for estimating the standard deviation in case of a
 \item{\dots}{additional arguments to be passed to the generic function.} 
 }
 %\details{}
+
 \value{Returns an object of class 'qcc'.}
+
+\note{For a nice blog post discussing the \code{qcc} package, in particular how to implement the \emph{Western Eletric Rules (WER)}, see \url{http://blog.yhathq.com/posts/quality-control-in-r.html}.}
+
 \references{
 Mason, R.L. and Young, J.C. (2002) \emph{Multivariate Statistical Process Control with Industrial Applications}, SIAM. \cr
 Montgomery, D.C. (2005) \emph{Introduction to Statistical Quality Control}, 5th ed. New York: John Wiley & Sons. \cr
 Ryan, T. P. (2000), \emph{Statistical Methods for Quality Improvement}, 2nd ed. New York: John Wiley & Sons, Inc. \cr
-Scrucca, L. (2004). qcc: an R package for quality control charting and statistical process control. \emph{R News} 4/1, 11-17.
+Scrucca, L. (2004). qcc: an R package for quality control charting and statistical process control. \emph{R News} 4/1, 11-17. \cr
 Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
 
-\author{Luca Scrucca \email{luca@stat.unipg.it}}
+\author{Luca Scrucca}
 %\note{ ~~further notes~~ }
 
 \seealso{\code{\link{shewhart.rules}}, \code{\link{cusum}}, \code{\link{ewma}}, \code{\link{oc.curves}}, \code{\link{process.capability}}, \code{\link{qcc.groups}} }

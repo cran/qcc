@@ -4,7 +4,7 @@
 \title{Circuit boards data}
 \description{
 Number of nonconformities observed in 26 successive samples of 100 printed circuit boards.
-Sample 6 and 20 are outside the control limits. Sample 6 was examined by a new inspector and he did not recognize several type of nonconformities that could have been present. Furthermore, the unusually large number of nonconformities in sample 20 resulted from a temperature control problem in the wave soldering machine, which was subsequentely repaired.
+Sample 6 and 20 are outside the control limits. Sample 6 was examined by a new inspector and he did not recognize several type of nonconformities that could have been present. Furthermore, the unusually large number of nonconformities in sample 20 resulted from a temperature control problem in the wave soldering machine, which was subsequently repaired.
 The last 20 samples are further samples collected on inspection units (each formed by 100 boards).
 }
 \usage{data(circuit)}

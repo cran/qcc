@@ -18,30 +18,23 @@ limits.xbar(center, std.dev, sizes, conf)
   \item{conf}{a numeric value used to compute control limits, specifying the number of standard deviations (if \code{conf} > 1) or the confidence level (if 0 < \code{conf} < 1).}
 }
 \details{
-Methods  available for estimating the process standard deviation:
-\tabular{ll}{
-Method \tab Description \cr
-\code{"UWAVE-R"} \tab UnWeighted AVErage of subgroup estimates \cr
-                 \tab based on subgroup Ranges \cr
-\code{"UWAVE-SD"} \tab UnWeighted AVErage of subgroup estimates  \cr
-                 \tab based on subgroup Standard Deviations \cr
-\code{"MVLUE-R"} \tab Minimum Variance Linear Unbiased Estimator  \cr
-                 \tab computed as a weighted average of subgroups \cr
-                 \tab estimates based on subgroup Ranges \cr
-\code{"MVLUE-SD"} \tab Minimum Variance Linear Unbiased Estimator  \cr
-                 \tab computed as a weighted average of subgroup  \cr
-                 \tab estimates based on subgroup Standard Deviations \cr
-\code{"RMSDF"} \tab Root-Mean-Square estimator computed as a weighted average of \cr
-                 \tab subgroup estimates based on subgroup Standard Deviations
+The following methods are available for estimating the process standard deviation:
+\describe{
+\item{\code{"UWAVE-R"}}{UnWeighted AVErage of subgroup estimates based on subgroup Ranges}
+\item{\code{"UWAVE-SD"}}{UnWeighted AVErage of subgroup estimates based on subgroup Standard Deviations}
+\item{\code{"MVLUE-R"}}{Minimum Variance Linear Unbiased Estimator computed as a weighted average of subgroups estimates based on subgroup Ranges}
+\item{\code{"MVLUE-SD"}}{Minimum Variance Linear Unbiased Estimator computed as a weighted average of subgroup estimates based on subgroup Standard Deviations}
+\item{\code{"RMSDF"}}{Root-Mean-Square estimator computed as a weighted average of subgroup estimates based on subgroup Standard Deviations}
 }
 
-\tabular{llll}{
-Method \tab \code{"xbar"} \tab \code{"R"} \tab \code{"S"} \cr
-\code{"UWAVE-R"} \tab default \tab default \tab not available \cr
-\code{"UWAVE-SD"} \tab  \tab not available \tab default \cr
-\code{"MVLUE-R"} \tab \tab \tab not available  \cr
-\code{"MVLUE-SD"} \tab \tab not available  \tab \cr
-\code{"RMSDF"} \tab \tab not available \tab
+Depending on the chart, a method may be available or not, or set as the default according to the following table:
+\tabular{lcccc}{
+Method \tab\tab \code{"xbar"} \tab \code{"R"} \tab \code{"S"} \cr
+\code{"UWAVE-R"} \tab\tab default \tab default \tab not available \cr
+\code{"UWAVE-SD"} \tab\tab  \tab not available \tab default \cr
+\code{"MVLUE-R"} \tab\tab \tab \tab not available  \cr
+\code{"MVLUE-SD"} \tab\tab \tab not available  \tab \cr
+\code{"RMSDF"} \tab\tab \tab not available \tab
 }
 
 Detailed definitions of formulae implemented are available in the SAS/QC 9.2 User's Guide.
@@ -58,7 +51,7 @@ Burr, I.W. (1969) Control charts for measurements with varying sample sizes. \em
 Montgomery, D.C. (2005) \emph{Introduction to Statistical Quality Control}, 5th ed. New York: John Wiley & Sons. \cr
 Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
-\author{Luca Scrucca \email{luca@stat.unipg.it}}
+\author{Luca Scrucca}
 %\note{}
 \seealso{\code{\link{qcc}} }
 %\examples{}

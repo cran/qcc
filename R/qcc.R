@@ -15,19 +15,21 @@
 #  Main function to create a 'qcc' object
 #
 
-qcc <- function(data, type = c("xbar", "R", "S", "xbar.one", "p", "np", "c", "u", "g"), sizes, center, std.dev, limits, data.name, labels, newdata, newsizes, newlabels, nsigmas = 3, confidence.level, rules = shewhart.rules, plot = TRUE, ...)
+qcc <- function(data, type = c("xbar", "R", "S", "xbar.one", "p", "np", "c", "u", "g"), sizes, center, std.dev, limits, data.name, labels, newdata, newsizes, newdata.name, newlabels, nsigmas = 3, confidence.level, rules = shewhart.rules, plot = TRUE, ...)
 {
   call <- match.call()
   
   if (missing(data))
      stop("'data' argument is not specified")
   
-  
+  if(identical(type, eval(formals(qcc)$type)))
+    { type <- as.character(type)[1]
+      warning("chart 'type' not specified, assuming \"", type, "\"",
+              immediate. = TRUE) }
   if(!exists(paste("stats.", type, sep = ""), mode="function") |
      !exists(paste("sd.", type, sep = ""), mode="function") |
      !exists(paste("limits.", type, sep = ""), mode="function"))
-    stop(paste("invalid", type, "control chart"))
-  # type <- match.arg(type)
+    stop(paste("invalid", type, "control chart. See help(qcc) "))
 
   if (missing(data.name)) 
      data.name <- deparse(substitute(data))
@@ -57,7 +59,8 @@ qcc <- function(data, type = c("xbar", "R", "S", "xbar.one", "p", "np", "c", "u"
   sd <- paste("sd.", type, sep = "")
   if (!exists(sd, mode="function"))
      stop(paste("function", sd, "is not defined!"))
-  if (missing(std.dev)) 
+  missing.std.dev <- missing(std.dev)
+  if (missing.std.dev)
      { std.dev <- NULL
        std.dev <- switch(type, 
                          "xbar" = { if(any(sizes > 25)) "RMSDF"
@@ -84,7 +87,8 @@ qcc <- function(data, type = c("xbar", "R", "S", "xbar.one", "p", "np", "c", "u"
                  center = center, std.dev = std.dev)
   # check for new data provided and update object
   if (!missing(newdata))
-     { newdata.name <- deparse(substitute(newdata))
+     {   if (missing(newdata.name))
+			{newdata.name <- deparse(substitute(newdata))}
        newdata <- data.matrix(newdata)
        if (missing(newsizes))
           { if (any(type==c("p", "np", "u")))
@@ -134,7 +138,7 @@ qcc <- function(data, type = c("xbar", "R", "S", "xbar.one", "p", "np", "c", "u"
                                       sizes = sizes, conf = conf)) 
      }
   else 
-     { if (!missing(std.dev))
+     { if (!missing.std.dev)
           warning("'std.dev' is not used when limits is given")
        if (!is.numeric(limits))
           stop("'limits' must be a vector of length 2 or a 2-columns matrix")
@@ -209,7 +213,7 @@ summary.qcc <- function(object, digits =  getOption("digits"), ...)
                  newdata.name, ":\n", sep = ""))
        print(summary(newstats), digits = digits, ...)
        newsizes <- object$newsizes
-       if (!any(diff(newsizes)))
+       if (length(unique(newsizes)) == 1)
           newsizes <- newsizes[1]
        if (length(newsizes) == 1)
              cat("\nGroup sample size: ", format(newsizes))
@@ -280,10 +284,10 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
 
   oldpar <- par(no.readonly = TRUE)
   if(restore.par) on.exit(par(oldpar))
-  mar <- pmax(oldpar$mar, c(5.1,4.1,4.1,2.1))
+  mar <- pmax(oldpar$mar, c(4.1,4.1,3.1,2.1))
   par(bg  = qcc.options("bg.margin"), 
-      cex = qcc.options("cex"),
-      mar = if(add.stats) pmax(mar, c(8.5,0,0,0)) else mar)
+      cex = oldpar$cex * qcc.options("cex"),
+      mar = if(add.stats) pmax(mar, c(7.6,0,0,0)) else mar)
 
   # plot Shewhart chart
   plot(indices, statistics, type="n",
@@ -291,7 +295,7 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
               else range(statistics, limits, center),
        ylab = if(missing(ylab)) "Group summary statistics" else ylab,
        xlab = if(missing(xlab)) "Group" else xlab, 
-       axes = FALSE, main = main.title)
+       axes = FALSE)
   rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
        col = qcc.options("bg.figure"))
   axis(1, at = indices, las = axes.las,
@@ -299,6 +303,12 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
                    as.character(indices) else names(statistics))
   axis(2, las = axes.las)
   box()
+  top.line <- par("mar")[3]-length(capture.output(cat(main.title)))
+  top.line <- top.line - if(chart.all & (!is.null(newstats))) 0.1 else 0.5
+  mtext(main.title, side = 3, line = top.line,
+        font = par("font.main"), 
+        cex  = qcc.options("cex"), 
+        col  = par("col.main"))
 
   lines(indices, statistics, type = "b", pch=20) 
 
@@ -308,14 +318,14 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
 
   if(length(lcl) == 1) 
     { abline(h = lcl, lty = 2)
-     abline(h = ucl, lty = 2) }
+      abline(h = ucl, lty = 2) }
   else 
     { lines(indices, lcl[indices], type="s", lty = 2)
       lines(indices, ucl[indices], type="s", lty = 2) }
   mtext(label.limits, side = 4, at = c(rev(lcl)[1], rev(ucl)[1]), 
-        las = 1, line = 0.1, col = gray(0.3))
+        las = 1, line = 0.1, col = gray(0.3), cex = par("cex"))
   mtext("CL", side = 4, at = rev(center)[1], 
-        las = 1, line = 0.1, col = gray(0.3))
+        las = 1, line = 0.1, col = gray(0.3), cex = par("cex"))
 
   if(is.null(qcc.options("violating.runs")))
      stop(".qcc.options$violating.runs undefined. See help(qcc.options).")
@@ -345,10 +355,12 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
     { len.obj.stats <- length(object$statistics)
       len.new.stats <- length(statistics) - len.obj.stats
       abline(v = len.obj.stats + 0.5, lty = 3)
-      mtext(paste("Calibration data in", data.name), 
-            at = len.obj.stats/2, adj = 0.5, cex=0.8)
-      mtext(paste("New data in", object$newdata.name),  
-            at = len.obj.stats + len.new.stats/2, adj = 0.5, cex=0.8)
+      mtext(# paste("Calibration data in", data.name),
+            "Calibration data", cex = par("cex")*0.8,
+            at = len.obj.stats/2, line = 0, adj = 0.5)
+      mtext(# paste("New data in", object$newdata.name),  
+            "New data", cex = par("cex")*0.8, 
+            at = len.obj.stats + len.new.stats/2, line = 0, adj = 0.5)
     }
 
   if(add.stats) 
@@ -358,76 +370,76 @@ plot.qcc <- function(x, add.stats = TRUE, chart.all = TRUE,
       px <- diff(usr[1:2])/diff(plt[1:2])
       xfig <- c(usr[1]-px*plt[1], usr[2]+px*(1-plt[2]))
       at.col <- xfig[1] + diff(xfig[1:2])*c(0.10, 0.40, 0.65)
+      top.line <- 4.5
       # write info at bottom
       mtext(paste("Number of groups = ", length(statistics), sep = ""), 
-            side = 1, line = 5, adj = 0, at = at.col[1],
+            side = 1, line = top.line, adj = 0, at = at.col[1],
             font = qcc.options("font.stats"),
-            cex = qcc.options("cex.stats"))
-      
+            cex = par("cex")*qcc.options("cex.stats"))
       center <- object$center
       if(length(center) == 1)
         { mtext(paste("Center = ", signif(center[1], digits), sep = ""),
-                side = 1, line = 6, adj = 0, at = at.col[1],
+                side = 1, line = top.line+1, adj = 0, at = at.col[1],
                 font = qcc.options("font.stats"),
-                cex = qcc.options("cex.stats"))
+                cex = par("cex")*qcc.options("cex.stats"))
         }
       else 
         { mtext("Center is variable",
-                side = 1, line = 6, adj = 0, at = at.col[1],
+                side = 1, line = top.line+1, adj = 0, at = at.col[1],
                 font = qcc.options("font.stats"),
-                cex = qcc.options("cex.stats"))
+                cex = par("cex")*qcc.options("cex.stats"))
         }
       
       if(length(std.dev) == 1)
         { mtext(paste("StdDev = ", signif(std.dev, digits), sep = ""),
-                side = 1, line = 7, adj = 0, at = at.col[1],
+                side = 1, line = top.line+2, adj = 0, at = at.col[1],
                 font = qcc.options("font.stats"),
-                cex = qcc.options("cex.stats"))
+                cex = par("cex")*qcc.options("cex.stats"))
         }      
       else
         { mtext("StdDev is variable",
-                side = 1, line = 7, adj = 0, at = at.col[1],
+                side = 1, line = top.line+2, adj = 0, at = at.col[1],
                 font = qcc.options("font.stats"),
-                cex = qcc.options("cex.stats"))
+                cex = par("cex")*qcc.options("cex.stats"))
         }
       
       if(length(unique(lcl)) == 1)
         { mtext(paste("LCL = ", signif(lcl[1], digits), sep = ""), 
-                side = 1, line = 6, adj = 0, at = at.col[2],
+                side = 1, line = top.line+1, adj = 0, at = at.col[2],
                 font = qcc.options("font.stats"),
-                cex = qcc.options("cex.stats"))
+                cex = par("cex")*qcc.options("cex.stats"))
         }
       else 
         { mtext("LCL is variable", 
-                side = 1, line = 6, adj = 0, at = at.col[2],
-                font =qcc.options("font.stats"),
-                cex = qcc.options("cex.stats"))
+                side = 1, line = top.line+1, adj = 0, at = at.col[2],
+                font = qcc.options("font.stats"),
+                cex = par("cex")*qcc.options("cex.stats"))
         }
       
       if(length(unique(ucl)) == 1)
          { mtext(paste("UCL = ", signif(ucl[1], digits), sep = ""),
-                 side = 1, line = 7, adj = 0, at = at.col[2],
+                 side = 1, line = top.line+2, adj = 0, at = at.col[2],
                  font = qcc.options("font.stats"),
-                 cex = qcc.options("cex.stats")) 
+                 cex = par("cex")*qcc.options("cex.stats")) 
          }
        else 
          { mtext("UCL is variable", 
-                 side = 1, line = 7, adj = 0, at = at.col[2],
-                 font =qcc.options("font.stats"),
-                 cex = qcc.options("cex.stats"))
+                 side = 1, line = top.line+2, adj = 0, at = at.col[2],
+                 font = qcc.options("font.stats"),
+                 cex = par("cex")*qcc.options("cex.stats"))
          }
       
        if(!is.null(violations))
          { mtext(paste("Number beyond limits =",
                        length(unique(violations$beyond.limits))), 
-                 side = 1, line = 6, adj = 0, at = at.col[3],
+                 side = 1, line = top.line+1, adj = 0, at = at.col[3],
                  font = qcc.options("font.stats"),
-                 cex = qcc.options("cex.stats"))
+                 cex = par("cex")*qcc.options("cex.stats"))
            mtext(paste("Number violating runs =",
                        length(unique(violations$violating.runs))), 
-                 side = 1, line = 7, adj = 0, at = at.col[3],
+                 side = 1, line = top.line+2, adj = 0, at = at.col[3],
                  font = qcc.options("font.stats"),
-                 cex = qcc.options("cex.stats"))
+                 cex = par("cex")*qcc.options("cex.stats"))
          }
      }
 
@@ -696,11 +708,7 @@ sd.p <- function(data, sizes, ...)
 
 limits.p <- function(center, std.dev, sizes, conf)
 { 
-  # use normal approximation for computing control limits
-  limits <- limits.xbar(center, std.dev, sizes, conf)
-  limits[limits < 0] <- 0
-  limits[limits > 1] <- 1
-  return(limits)
+  limits.np(center * sizes, std.dev, sizes, conf) / sizes
 }
 
 # np Chart
@@ -729,15 +737,25 @@ sd.np <- function(data, sizes, ...)
 
 limits.np <- function(center, std.dev, sizes, conf)
 { 
-  # use normal approximation for computing control limits
+  sizes <- as.vector(sizes)
   if (length(unique(sizes)) == 1)
      sizes <- sizes[1]
-  limits <- limits.xbar(center, std.dev*sqrt(sizes), sizes, conf)
-  limits[limits < 0] <- 0
-  if (length(sizes)==1)
-      limits[limits > sizes] <- sizes
+  pbar <- mean(center / sizes)
+  if (conf >= 1)
+     { tol <- conf * sqrt(pbar * (1 - pbar) * sizes)
+       lcl <- pmax(center - tol, 0)
+       ucl <- pmin(center + tol, sizes)
+     }
   else
-      limits[limits > sizes] <- sizes[limits > sizes]
+     { if (conf > 0 & conf < 1)
+          { lcl <- qbinom((1 - conf)/2, sizes, pbar)
+            ucl <- qbinom((1 - conf)/2, sizes, pbar, lower.tail = FALSE)
+          }
+       else stop("invalid conf argument. See help.")
+     }
+  limits <- matrix(c(lcl, ucl), ncol = 2)
+  rownames(limits) <- rep("", length = nrow(limits))
+  colnames(limits) <- c("LCL", "UCL")
   return(limits)
 }
 
@@ -796,7 +814,7 @@ sd.u <- function(data, sizes, ...)
 {
   data <- as.vector(data)
   sizes <- as.vector(sizes)
-  std.dev <- sqrt(sum(sizes * data)/sum(sizes))
+  std.dev <- sqrt(sum(data)/sum(sizes))
   return(std.dev)
 }
 
@@ -805,15 +823,7 @@ limits.u <- function(center, std.dev, sizes, conf)
   sizes <- as.vector(sizes)
   if (length(unique(sizes))==1)
      sizes <- sizes[1]
-  if (conf > 0 & conf < 1)  
-     conf <- qnorm(1 - (1 - conf)/2)
-  lcl <- center - conf * sqrt(center/sizes)
-  lcl[lcl < 0] <- 0
-  ucl <- center + conf * sqrt(center/sizes)
-  limits <- matrix(c(lcl, ucl), ncol = 2)
-  rownames(limits) <- rep("", length = nrow(limits))
-  colnames(limits) <- c("LCL", "UCL")
-  return(limits)
+  limits.c(center * sizes, std.dev, sizes, conf) / sizes
 }
 
 #
@@ -889,16 +899,16 @@ oc.curves <- function(object, ...)
   if (length(size)>1)
      stop("Operating characteristic curves available only for equal sample sizes!")
 
-  if (object$type=="p" | object$type=="np")
-     beta <- oc.curves.p(object, ...)
-  else
-     if (object$type=="c" | object$type=="u")
-        beta <- oc.curves.c(object, ...)
-     else
-        if (object$type=="xbar")
-           beta <- oc.curves.xbar(object, ...)
-     else
-           stop("Operating characteristic curves not available for this type of chart.")
+  beta <- switch(object$type,
+                 xbar = oc.curves.xbar(object, ...),
+                 R    = oc.curves.R(object, ...),
+                 S    = oc.curves.S(object, ...),
+                 np   =,
+                 p    = oc.curves.p(object, ...),
+                 u    =,
+                 c    = oc.curves.c(object, ...))
+  if (is.null(beta))
+     stop("Operating characteristic curves not available for this type of chart.")
 
   invisible(beta)
 }
@@ -909,7 +919,6 @@ oc.curves.xbar <- function(object, n, c = seq(0, 5, length=101), nsigmas = objec
 # limits. The values on the vertical axis give the probability of not detecting
 # a shift of c*sigma in the mean on the first sample following the shift.
 
-  type <- object$type
   if (!(object$type=="xbar"))
      stop("not a `qcc' object of type \"xbar\".")
 
@@ -918,6 +927,8 @@ oc.curves.xbar <- function(object, n, c = seq(0, 5, length=101), nsigmas = objec
      stop("Operating characteristic curves available only for equal sample sizes!")
   if (missing(n))
      n <- unique(c(size, c(1,5,10,15,20)))
+  if (is.null(nsigmas))
+     nsigmas <- qnorm(1 - (1 - object$confidence.level) / 2)
 
   beta <- matrix(as.double(NA), length(n), length(c))
   for (i in 1:length(n))
@@ -925,20 +936,26 @@ oc.curves.xbar <- function(object, n, c = seq(0, 5, length=101), nsigmas = objec
   rownames(beta) <- paste("n=",n,sep="")
   colnames(beta) <- c
 
-  oldpar <- par(bg  = qcc.options("bg.margin"), 
-                cex = qcc.options("cex"),
-                no.readonly = TRUE)
-  if (restore.par) on.exit(par(oldpar))
-  
+  oldpar <- par(no.readonly = TRUE)
+  if(restore.par) on.exit(par(oldpar))
+  par(bg  = qcc.options("bg.margin"), 
+      cex = oldpar$cex * qcc.options("cex"),
+      mar = pmax(oldpar$mar, c(4.1,4.1,2.1,2.1)))
+
   plot(c, beta[1,], type="n",
        ylim = c(0,1), xlim = c(0,max(c)),
        xlab = "Process shift (std.dev)",
-       ylab = "Prob. type II error ",
-       main = paste("OC curves for", object$type, "chart"))
+       ylab = "Prob. type II error ")
   rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
        col = qcc.options("bg.figure"))
-  for (i in 1:length(n))
-      lines(c, beta[i,], type = "l", lty=i)
+  box()
+  mtext(paste("OC curves for", object$type, "Chart"), 
+        side = 3, line = par("mar")[3]/3,
+        font = par("font.main"), 
+        cex  = qcc.options("cex"), 
+        col  = par("col.main"))
+  for(i in 1:length(n))
+     lines(c, beta[i,], type = "l", lty=i)
   beta <- t(beta)
   names(dimnames(beta)) <- c("shift (std.dev)", "sample size")
 
@@ -961,7 +978,6 @@ oc.curves.xbar <- function(object, n, c = seq(0, 5, length=101), nsigmas = objec
 
 oc.curves.p <- function(object, nsigmas = object$nsigmas, identify=FALSE, restore.par=TRUE)
 {
-  type <- object$type
   if (!(object$type=="p" | object$type=="np"))
      stop("not a `qcc' object of type \"p\" or \"np\".")
 
@@ -983,18 +999,25 @@ oc.curves.p <- function(object, nsigmas = object$nsigmas, identify=FALSE, restor
   beta <- pbinom(UCL, size, p) - pbinom(LCL-1, size, p)
   names(beta) <- p
 
-  oldpar <- par(bg  = qcc.options("bg.margin"), 
-                cex = qcc.options("cex"),
-                no.readonly = TRUE)
-  if (restore.par) on.exit(par(oldpar))
+  oldpar <- par(no.readonly = TRUE)
+  if(restore.par) on.exit(par(oldpar))
+  par(bg  = qcc.options("bg.margin"), 
+      cex = oldpar$cex * qcc.options("cex"),
+      mar = pmax(oldpar$mar, c(4.1,4.1,2.1,2.1)))
 
   plot(p, beta, type = "n", 
        ylim = c(0,1), xlim = c(0,1),
-       main = paste("OC curves for", object$type, "chart"), 
        xlab = expression(p), 
        ylab = "Prob. type II error ")
   rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
        col = qcc.options("bg.figure"))
+  box()
+  mtext(paste("OC curves for", object$type, "Chart"), 
+        side = 3, line = par("mar")[3]/3,
+        font = par("font.main"), 
+        cex  = qcc.options("cex"), 
+        col  = par("col.main"))
+
   lines(p, beta)
   lines(rep(p[which.max(beta)], 2), c(0, max(beta)), lty = 2)
 
@@ -1039,18 +1062,25 @@ oc.curves.c <- function(object, nsigmas = object$nsigmas, identify=FALSE, restor
   beta <- ppois(UCL, lambda) - ppois(LCL-1, lambda)
   names(beta) <- lambda
 
-  oldpar <- par(bg  = qcc.options("bg.margin"), 
-                cex = qcc.options("cex"),
-                no.readonly = TRUE)
+  oldpar <- par(no.readonly = TRUE)
   if(restore.par) on.exit(par(oldpar))
+  par(bg  = qcc.options("bg.margin"), 
+      cex = oldpar$cex * qcc.options("cex"),
+      mar = pmax(oldpar$mar, c(4.1,4.1,2.1,2.1)))
 
   plot(lambda, beta, type = "n", 
        ylim = c(0,1), xlim = range(lambda),
-       main = paste("OC curves for", object$type, "chart"), 
        xlab = "Mean", 
        ylab = "Prob. type II error ")
   rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
        col = qcc.options("bg.figure"))
+  box()
+  mtext(paste("OC curves for", object$type, "Chart"), 
+        side = 3, line = par("mar")[3]/3,
+        font = par("font.main"), 
+        cex  = qcc.options("cex"), 
+        col  = par("col.main"))
+
   lines(lambda, beta)     
   lines(rep(lambda[which.max(beta)], 2), c(0, max(beta)), lty = 2)
 
@@ -1062,6 +1092,171 @@ oc.curves.c <- function(object, nsigmas = object$nsigmas, identify=FALSE, restor
                        ", ARL=", formatC(1/(1-beta), 2, flag="-"), sep="")
        i <- identify(lambda, beta, labels, pos=4, offset=0.2)
        apply(as.matrix(labels[i$ind]), 1, cat, "\n")
+     }
+  invisible(beta)
+}
+
+oc.curves.R <-
+function(object, n, c = seq(1, 6, length=101), nsigmas = object$nsigmas, identify=FALSE, restore.par=TRUE)
+{
+# Draw the operating-characteristic curves for the R-chart with nsigmas
+# limits. The values on the vertical axis give the probability of not detecting
+# a change from sigma to c*sigma on the first sample following the change.
+
+  if (!(object$type=="R"))
+     stop("not a `qcc' object of type \"R\".")
+
+  size <- unique(object$sizes)
+  if (length(size) > 1)
+     stop("Operating characteristic curves available only for equal sample sizes!")
+  if (missing(n))
+     n <- unique(c(size, c(2,5,10,15,20)))
+  if (is.null(nsigmas))
+    { tail.prob <- (1 - object$confidence.level) / 2
+      beta.fun1 <- function(c, n, p)
+      {
+        lcl <- qtukey(p, n, Inf)
+        ucl <- qtukey(p, n, Inf, lower.tail = FALSE)
+        ptukey(ucl / c, n, Inf) - ptukey(lcl / c, n, Inf)
+      }
+      beta <- outer(c, n, beta.fun1, tail.prob)
+    }
+  else
+    { exp.R.unscaled <- qcc.options("exp.R.unscaled")
+      se.R.unscaled <- qcc.options("se.R.unscaled")
+      Rtab <- min(length(exp.R.unscaled), length(se.R.unscaled))
+      if (any(n > Rtab))
+          stop(paste("group size must be less than",
+                      Rtab + 1, "when giving nsigmas"))
+      beta.fun2 <- function(c, n, conf)
+      {
+        d2 <- exp.R.unscaled[n]
+        d3 <- se.R.unscaled[n]
+        lcl <- pmax(0, d2 - conf * d3)
+        ucl <- d2 + conf * d3
+        ptukey(ucl / c, n, Inf) - ptukey(lcl / c, n, Inf)
+      }
+      beta <- outer(c, n, beta.fun2, nsigmas)
+    }
+
+  colnames(beta) <- paste("n=",n,sep="")
+  rownames(beta) <- c
+
+  oldpar <- par(no.readonly = TRUE)
+  if(restore.par) on.exit(par(oldpar))
+  par(bg  = qcc.options("bg.margin"), 
+      cex = oldpar$cex * qcc.options("cex"),
+      mar = pmax(oldpar$mar, c(4.1,4.1,2.1,2.1)))
+
+  plot(c, beta[,1], type="n",
+       ylim = c(0,1), xlim = c(1,max(c)),
+       xlab = "Process scale multiplier",
+       ylab = "Prob. type II error ")
+  rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+       col = qcc.options("bg.figure"))
+  box()
+  mtext(paste("OC curves for", object$type, "Chart"), 
+        side = 3, line = par("mar")[3]/3,
+        font = par("font.main"), 
+        cex  = qcc.options("cex"), 
+        col  = par("col.main"))
+  
+  matlines(c, beta, lty = 1:length(n), col = 1)
+
+  names(dimnames(beta)) <- c("scale multiplier", "sample size")
+
+  if (identify)
+     { cs <- rep(c,length(n))
+       betas <- as.vector(beta)
+       labels <- paste("c=", formatC(cs, 2, flag="-"),
+                       ": beta=", formatC(betas, 4, flag="-"),
+                       ", ARL=", formatC(1/(1-betas), 2, flag="-"), sep="")
+       i <- identify(cs, betas, labels, pos=4, offset=0.2)
+       apply(as.matrix(labels[i$ind]), 1, cat, "\n")
+     }
+  else
+     { legend(max(c), 1, legend = paste("n =", n),
+              bg = qcc.options("bg.figure"),
+              lty = 1:length(n), xjust = 1, yjust = 1)
+     }
+  invisible(beta)
+}
+
+oc.curves.S <- function(object, n, c = seq(1, 6, length=101), nsigmas = object$nsigmas, identify=FALSE, restore.par=TRUE)
+{
+# Draw the operating-characteristic curves for the S-chart with nsigmas
+# limits. The values on the vertical axis give the probability of not detecting
+# a change from sigma to c*sigma on the first sample following the change.
+
+  if (!(object$type=="S"))
+     stop("not a `qcc' object of type \"S\".")
+
+  size <- unique(object$sizes)
+  if (length(size) > 1)
+     stop("Operating characteristic curves available only for equal sample sizes!")
+  if (missing(n))
+     n <- unique(c(size, c(2,5,10,15,20)))
+  if (is.null(nsigmas))
+    { tail.prob <- (1 - object$confidence.level) / 2
+      beta.fun1 <- function(c, n, p)
+      {
+        ucl <- sqrt(qchisq(1 - p, n - 1) / (n - 1))
+        lcl <- sqrt(qchisq(p, n - 1) / (n - 1))
+        pchisq((n - 1) * (ucl / c)^2, n - 1) - pchisq((n - 1)* (lcl / c)^2, n - 1)
+      }
+      beta <- outer(c, n, beta.fun1, tail.prob)
+    }
+  else
+    { c4 <- .qcc.c4
+      beta.fun2 <- function(c, n)
+      {
+        center <- c4(n)
+        tol <- sqrt(1 - c4(n)^2)
+        lcl <- pmax(0, center - nsigmas * tol)
+        ucl <- center + nsigmas * tol
+        pchisq((n - 1) * (ucl / c)^2, n - 1) - pchisq((n - 1) * (lcl / c)^2, n - 1)
+      }
+      beta <- outer(c, n, beta.fun2)
+    }
+
+  colnames(beta) <- paste("n=",n,sep="")
+  rownames(beta) <- c
+
+  oldpar <- par(no.readonly = TRUE)
+  if(restore.par) on.exit(par(oldpar))
+  par(bg  = qcc.options("bg.margin"), 
+      cex = oldpar$cex * qcc.options("cex"),
+      mar = pmax(oldpar$mar, c(4.1,4.1,2.1,2.1)))
+
+  plot(c, beta[,1], type="n",
+       ylim = c(0,1), xlim = c(1,max(c)),
+       xlab = "Process scale multiplier",
+       ylab = "Prob. type II error ")
+  rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+       col = qcc.options("bg.figure"))
+  box()
+  mtext(paste("OC curves for", object$type, "Chart"), 
+        side = 3, line = par("mar")[3]/3,
+        font = par("font.main"), 
+        cex  = qcc.options("cex"), 
+        col  = par("col.main"))
+  matlines(c, beta, lty = 1:length(n), col = 1)
+
+  names(dimnames(beta)) <- c("scale multiplier", "sample size")
+
+  if (identify)
+     { cs <- rep(c,length(n))
+       betas <- as.vector(beta)
+       labels <- paste("c=", formatC(cs, 2, flag="-"),
+                       ": beta=", formatC(betas, 4, flag="-"),
+                       ", ARL=", formatC(1/(1-betas), 2, flag="-"), sep="")
+       i <- identify(cs, betas, labels, pos=4, offset=0.2)
+       apply(as.matrix(labels[i$ind]), 1, cat, "\n")
+     }
+  else
+     { legend(max(c), 1, legend = paste("n =", n),
+              bg = qcc.options("bg.figure"),
+              lty = 1:length(n), xjust = 1, yjust = 1)
      }
   invisible(beta)
 }

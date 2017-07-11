@@ -27,12 +27,12 @@ Approximate confidence limits for \eqn{C_{pl}}{C_pl}, \eqn{C_{pu}}{C_pu} and  \e
 Confidence limits for \eqn{C_{pm}}{C_pm} are based on the method of Boyles (1991); this method is approximate and it assumes that the target is midway between the specification limits.
 }
 \value{Invisibly returns a list with components:
-\item{nobs}{number of obserations}
+\item{nobs}{number of observations}
 \item{center}{center}
 \item{std.dev}{standard deviation}
 \item{target}{target}
 \item{spec.limits}{a vector of values giving the lower specification limit (LSL) and the upper specification limit (USL)}
-\item{indices}{a matrix of capability indices (\eqn{C_p}{C_p}, \eqn{C_{pl}}{C_pl}, \eqn{C_{pu}}{C_pu}, \eqn{C_{pk}}{C_pk}, \eqn{C_{pm}}{C_pm}) and the corresponding confindence limits.}
+\item{indices}{a matrix of capability indices (\eqn{C_p}{C_p}, \eqn{C_{pl}}{C_pl}, \eqn{C_{pu}}{C_pu}, \eqn{C_{pk}}{C_pk}, \eqn{C_{pm}}{C_pm}) and the corresponding confidence limits.}
 \item{exp}{a vector of values giving the expected fraction, based on a normal approximation, of the observations less than LSL and greater than USL.}
 \item{obs}{a vector of values giving the fraction of observations less than LSL and greater than USL.}
 }
@@ -43,7 +43,7 @@ Chou, Y., Owen D.B. and Borrego S.A. (1990) \emph{Lower Confidence Limits on Pro
 Montgomery, D.C. (2005) \emph{Introduction to Statistical Quality Control}, 5th ed. New York: John Wiley & Sons. \cr
 Wetherill, G.B. and Brown, D.W. (1991) \emph{Statistical Process Control}. New York: Chapman & Hall.
 }
-\author{Luca Scrucca \email{luca@stat.unipg.it}}
+\author{Luca Scrucca}
 \seealso{\code{\link{qcc}}}
 \examples{
 data(pistonrings)

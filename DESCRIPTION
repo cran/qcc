@@ -1,16 +1,27 @@
 Package: qcc
-Version: 2.6
-Date: 2014-10-07
+Version: 2.7
+Date: 2017-07-09
 Title: Quality Control Charts
 Description: Shewhart quality control charts for continuous, attribute and count data. Cusum and EWMA charts. Operating characteristic curves. Process capability analysis. Pareto chart and cause-and-effect chart. Multivariate control charts.
-Author: Luca Scrucca <luca@stat.unipg.it>
-Maintainer: Luca Scrucca <luca@stat.unipg.it>
-Depends: R (>= 2.11)
-Imports: MASS
+Authors@R: c(person("Luca", "Scrucca", role = c("aut", "cre"),
+                    email = "luca.scrucca@unipg.it"),
+             person("Greg", "Snow", role = "ctb",
+                    email = "greg.snow@ihc.com"),
+             person("Peter", "Bloomfield", role = "ctb",
+                    email = "Peter_Bloomfield@ncsu.edu"))
+Depends: R (>= 3.0)
+Imports: MASS, utils, graphics, grDevices
+Suggests: knitr (>= 1.12), rmarkdown (>= 0.9)
 License: GPL (>= 2)
+VignetteBuilder: knitr
+URL: https://github.com/luca-scr/qcc
 Repository: CRAN
 ByteCompile: true
 LazyLoad: yes
-Packaged: 2014-10-07 10:16:19 UTC; luca
 NeedsCompilation: no
-Date/Publication: 2014-10-07 12:42:16
+Packaged: 2017-07-10 14:05:44 UTC; luca
+Author: Luca Scrucca [aut, cre],
+  Greg Snow [ctb],
+  Peter Bloomfield [ctb]
+Maintainer: Luca Scrucca <luca.scrucca@unipg.it>
+Date/Publication: 2017-07-11 05:51:24 UTC

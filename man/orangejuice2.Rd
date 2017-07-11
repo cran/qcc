@@ -29,5 +29,6 @@ summary(orangejuice2)
 boxplot(d ~ trial)
 mark <- ifelse(trial, 1, 2)
 plot(sample, d, type="b", col=mark, pch=mark)
+detach(orangejuice2)
 }
 \keyword{datasets}
